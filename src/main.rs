@@ -1,5 +1,7 @@
 mod scanner;
 
+use scanner::Scanner;
+
 use std::env;
 use std::fs;
 use std::io::{stdin, stdout, Write};
@@ -40,7 +42,7 @@ fn run_prompt() -> Result<(), String> {
 }
 
 fn run(source: &str) -> Result<(), String> {
-    let scanner = scanner::Scanner { source: source };
+    let scanner = Scanner { source: source };
     let tokens = scanner.scan_tokens();
 
     for token in &tokens {
