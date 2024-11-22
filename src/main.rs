@@ -1,4 +1,5 @@
 mod scanner;
+mod token_type;
 
 use scanner::Scanner;
 
