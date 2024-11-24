@@ -63,7 +63,7 @@ pub struct Token {
     token_type: TokenType,
     lexeme: String,
     literal: Option<LiteralValue>,
-    line: u64,
+    line: usize,
 }
 
 impl Token {
@@ -71,7 +71,7 @@ impl Token {
         token_type: TokenType,
         lexeme: String,
         literal: Option<LiteralValue>,
-        line: u64,
+        line: usize,
     ) -> Self {
         Self {
             token_type,
