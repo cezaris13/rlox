@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 #[allow(non_camel_case_types)]
 pub enum TokenType {
     // Single-character tokens.
@@ -50,7 +50,7 @@ pub enum TokenType {
     EOF,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum LiteralValue {
     IntValue(i64),
     FValue(f64),
@@ -58,15 +58,29 @@ pub enum LiteralValue {
     IdentifierValue(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
-    pub token_type: TokenType,
-    pub lexeme: String,
-    pub literal: Option<LiteralValue>,
-    pub line: u32,
+    token_type: TokenType,
+    lexeme: String,
+    literal: Option<LiteralValue>,
+    line: u64,
 }
 
 impl Token {
+    pub fn new(
+        token_type: TokenType,
+        lexeme: String,
+        literal: Option<LiteralValue>,
+        line: u64,
+    ) -> Self {
+        Self {
+            token_type,
+            lexeme,
+            literal,
+            line,
+        }
+    }
+
     pub fn to_string(&self) -> String {
         format!("{:?} {:?} {:?}", self.token_type, self.lexeme, self.literal)
     }

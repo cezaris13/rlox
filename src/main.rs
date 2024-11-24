@@ -43,10 +43,7 @@ fn run_prompt() -> Result<(), String> {
 }
 
 fn run(source: &str) -> Result<(), String> {
-    let scanner = Scanner {
-        source: source,
-        tokens: Vec::new(),
-    };
+    let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens()?;
 
     for token in &tokens {

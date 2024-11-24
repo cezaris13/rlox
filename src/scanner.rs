@@ -1,23 +1,49 @@
 use crate::token::{LiteralValue, Token, TokenType};
 
-pub struct Scanner<'a> {
-    pub source: &'a str,
-    pub tokens: Vec<Token>,
+pub struct Scanner {
+    source: String,
+    tokens: Vec<Token>,
+    start: u64,
+    current: u64,
+    line: u64,
 }
 
-impl Scanner<'_> {
-    pub fn scan_tokens(&self) -> Result<Vec<Token>, String> {
-        let mut vec: Vec<Token> = Vec::new();
-
-        for _ in 1..5 {
-            vec.push(Token {
-                token_type: TokenType::IF,
-                lexeme: String::from("some str"),
-                literal: Some(LiteralValue::IntValue(12)),
-                line: 12,
-            });
+impl Scanner {
+    pub fn new(source: &str) -> Self {
+        Self {
+            source: source.to_string(),
+            tokens: vec![],
+            start: 0,
+            current: 0,
+            line: 1,
+        }
+    }
+    pub fn scan_tokens(self: &mut Self) -> Result<Vec<Token>, String> {
+        while !self.is_at_end() {
+            self.start = self.current;
+            self.scan_token()?;
         }
 
-        Ok(vec)
+        for _ in 1..5 {
+            self.tokens.push(Token::new(
+                TokenType::IF,
+                String::from("some str"),
+                Some(LiteralValue::IntValue(12)),
+                12,
+            ));
+        }
+
+        self.tokens
+            .push(Token::new(TokenType::EOF, "".to_string(), None, self.line));
+
+        Ok(self.tokens.clone()) // temp fix
+    }
+
+    fn is_at_end(&self) -> bool {
+        self.current >= self.source.len() as u64
+    }
+
+    fn scan_token(self: &mut Self) -> Result<Token, String> {
+        todo!()
     }
 }
