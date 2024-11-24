@@ -1,7 +1,7 @@
 mod scanner;
-mod token_type;
+mod token;
 
-use scanner::Scanner;
+use crate::scanner::Scanner;
 
 use std::env;
 use std::fs;
@@ -43,8 +43,11 @@ fn run_prompt() -> Result<(), String> {
 }
 
 fn run(source: &str) -> Result<(), String> {
-    let scanner = Scanner { source: source };
-    let tokens = scanner.scan_tokens();
+    let scanner = Scanner {
+        source: source,
+        tokens: Vec::new(),
+    };
+    let tokens = scanner.scan_tokens()?;
 
     for token in &tokens {
         println!("{:?}", token);
@@ -62,7 +65,7 @@ fn main() {
     } else if args.len() == 2 {
         match run_file(&args[1]) {
             Err(message) => {
-                println!("{}", message);
+                println!("Error: {}", message);
                 exit(1);
             }
             _ => exit(0),
@@ -70,7 +73,7 @@ fn main() {
     } else {
         match run_prompt() {
             Err(message) => {
-                println!("{}", message);
+                println!("Error: {}", message);
                 exit(1);
             }
             _ => exit(0),
