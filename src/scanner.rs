@@ -111,10 +111,14 @@ impl Scanner {
             '\n' => self.line += 1,
             '"' => self.string()?,
             _ => {
-                return Err(format!(
-                    "Unexpected character {0} at line {1}",
-                    symbol, self.line
-                ))
+                if self.is_digit(symbol) {
+                    self.number()?;
+                } else {
+                    return Err(format!(
+                        "Unexpected character {0} at line {1}",
+                        symbol, self.line
+                    ));
+                }
             }
         }
         Ok(())
@@ -144,6 +148,56 @@ impl Scanner {
         self.add_token_lit(STRING, Some(StringValue(value)));
 
         Ok(())
+    }
+
+    fn is_digit(&self, symbol: char) -> bool {
+        symbol >= '0' && symbol <= '9'
+    }
+
+    fn number(self: &mut Self) -> Result<(), String> {
+        let mut is_fraction = false;
+
+        while self.is_digit(self.peek()) {
+            self.advance();
+        }
+
+        if self.peek() == '.' && self.is_digit(self.peek_next()) {
+            is_fraction = true;
+            self.advance();
+
+            while self.is_digit(self.peek()) {
+                self.advance();
+            }
+        }
+
+        let string_literal = self.source.as_bytes()[self.start..self.current]
+            .iter()
+            .map(|bytes| *bytes as char)
+            .collect::<String>();
+
+        println!("{}", string_literal);
+
+        if is_fraction {
+            match string_literal.parse::<f64>() {
+                Ok(value) => self.add_token_lit(NUMBER, Some(FValue(value))),
+                _ => return Err(format!("Failed to parse the float at line: {0}", self.line)),
+            }
+        } else {
+            match string_literal.parse::<i64>() {
+                Ok(value) => self.add_token_lit(NUMBER, Some(IntValue(value))),
+                _ => return Err(format!("Failed to parse the int at line: {0}", self.line)),
+            }
+        }
+
+        Ok(())
+    }
+
+    fn peek_next(&self) -> char {
+        if self.current + 1 >= self.source.len() {
+            return '\0';
+        }
+
+        self.source.as_bytes()[self.current + 1] as char
     }
 
     fn match_character(self: &mut Self, character: char) -> bool {
