@@ -62,7 +62,7 @@ pub enum LiteralValue {
 pub struct Token {
     pub token_type: TokenType,
     lexeme: String,
-    literal: Option<LiteralValue>,
+    pub literal: Option<LiteralValue>,
     line: usize,
 }
 

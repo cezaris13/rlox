@@ -1,3 +1,4 @@
+use crate::token::LiteralValue::*;
 use crate::token::TokenType::*;
 use crate::token::{LiteralValue, Token, TokenType};
 
@@ -19,6 +20,7 @@ impl Scanner {
             line: 1,
         }
     }
+
     pub fn scan_tokens(self: &mut Self) -> Result<Vec<Token>, String> {
         let mut errors = vec![];
 
@@ -107,6 +109,7 @@ impl Scanner {
             }
             ' ' | '\r' | '\t' => {}
             '\n' => self.line += 1,
+            '"' => self.string()?,
             _ => {
                 return Err(format!(
                     "Unexpected character {0} at line {1}",
@@ -114,6 +117,32 @@ impl Scanner {
                 ))
             }
         }
+        Ok(())
+    }
+
+    fn string(self: &mut Self) -> Result<(), String> {
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            return Err(format!("Unterminated string at line {0}", self.line));
+        }
+
+        self.advance();
+
+        // rust ranges are inclusive
+        let value = self.source.as_bytes()[self.start + 1..self.current - 1]
+            .iter()
+            .map(|byte| *byte as char)
+            .collect::<String>();
+
+        self.add_token_lit(STRING, Some(StringValue(value)));
+
         Ok(())
     }
 
@@ -194,5 +223,39 @@ mod tests {
         assert_eq!(scanner.tokens[2].token_type, EQUAL_EQUAL);
         assert_eq!(scanner.tokens[3].token_type, GREATER_EQUAL);
         assert_eq!(scanner.tokens[4].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_string_literal() {
+        let source = "\"ABC\"";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+        assert_eq!(scanner.tokens.len(), 2); // due to EOF token
+        assert_eq!(scanner.tokens[0].token_type, STRING);
+        match scanner.tokens[0].literal.as_ref().unwrap() {
+            StringValue(val) => assert_eq!(val, "ABC"),
+            _ => panic!("Incorrect literal"),
+        }
+
+        assert_eq!(scanner.tokens[1].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_string_literal_not_closed_returns_error() {
+        let source = "\"AB";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_err());
+        assert_eq!(
+            result.err(),
+            Some("Unterminated string at line 1\n".to_string())
+        );
     }
 }
