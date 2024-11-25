@@ -105,9 +105,7 @@ impl Scanner {
                     self.add_token(SLASH);
                 }
             }
-            ' ' => (),
-            '\r' => (),
-            '\t' => (),
+            ' ' | '\r' | '\t' => {}
             '\n' => self.line += 1,
             _ => {
                 return Err(format!(
@@ -159,5 +157,42 @@ impl Scanner {
             return '\0';
         }
         self.source.as_bytes()[self.current] as char
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn handler_one_char_tokens() {
+        let source = "((  ))";
+
+        let mut scanner = Scanner::new(source);
+
+        let _ = scanner.scan_tokens();
+
+        assert_eq!(scanner.tokens.len(), 5); // due to EOF token
+        assert_eq!(scanner.tokens[0].token_type, LEFT_PAREN);
+        assert_eq!(scanner.tokens[1].token_type, LEFT_PAREN);
+        assert_eq!(scanner.tokens[2].token_type, RIGHT_PAREN);
+        assert_eq!(scanner.tokens[3].token_type, RIGHT_PAREN);
+        assert_eq!(scanner.tokens[4].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_two_char_tokens() {
+        let source = "! != == >=";
+
+        let mut scanner = Scanner::new(source);
+
+        let _ = scanner.scan_tokens();
+
+        assert_eq!(scanner.tokens.len(), 5); // due to EOF token
+        assert_eq!(scanner.tokens[0].token_type, BANG);
+        assert_eq!(scanner.tokens[1].token_type, BANG_EQUAL);
+        assert_eq!(scanner.tokens[2].token_type, EQUAL_EQUAL);
+        assert_eq!(scanner.tokens[3].token_type, GREATER_EQUAL);
+        assert_eq!(scanner.tokens[4].token_type, EOF);
     }
 }

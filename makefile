@@ -6,3 +6,6 @@ runFile:
 
 run:
 	cargo run
+
+test:
+	cargo test

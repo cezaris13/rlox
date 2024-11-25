@@ -1,4 +1,4 @@
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 #[allow(non_camel_case_types)]
 pub enum TokenType {
     // Single-character tokens.
@@ -60,7 +60,7 @@ pub enum LiteralValue {
 
 #[derive(Debug, Clone)]
 pub struct Token {
-    token_type: TokenType,
+    pub token_type: TokenType,
     lexeme: String,
     literal: Option<LiteralValue>,
     line: usize,
