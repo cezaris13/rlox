@@ -66,6 +66,49 @@ impl Scanner {
             '+' => self.add_token(PLUS),
             ';' => self.add_token(SEMICOLON),
             '*' => self.add_token(STAR),
+            '!' => {
+                if self.match_character('=') {
+                    self.add_token(BANG_EQUAL)
+                } else {
+                    self.add_token(BANG)
+                }
+            }
+            '=' => {
+                if self.match_character('=') {
+                    self.add_token(EQUAL_EQUAL)
+                } else {
+                    self.add_token(EQUAL)
+                }
+            }
+
+            '<' => {
+                if self.match_character('=') {
+                    self.add_token(LESS_EQUAL)
+                } else {
+                    self.add_token(LESS)
+                }
+            }
+            '>' => {
+                if self.match_character('=') {
+                    self.add_token(GREATER_EQUAL)
+                } else {
+                    self.add_token(GREATER)
+                }
+            }
+            '/' => {
+                if self.match_character('/') {
+                    // A comment goes until the end of the line.
+                    while self.peek() != '\n' && !self.is_at_end() {
+                        self.advance();
+                    }
+                } else {
+                    self.add_token(SLASH);
+                }
+            }
+            ' ' => (),
+            '\r' => (),
+            '\t' => (),
+            '\n' => self.line += 1,
             _ => {
                 return Err(format!(
                     "Unexpected character {0} at line {1}",
@@ -74,6 +117,19 @@ impl Scanner {
             }
         }
         Ok(())
+    }
+
+    fn match_character(self: &mut Self, character: char) -> bool {
+        if self.is_at_end() {
+            return false;
+        }
+
+        if self.source.as_bytes()[self.current] as char != character {
+            return false;
+        }
+
+        self.current += 1;
+        true
     }
 
     fn advance(self: &mut Self) -> char {
@@ -96,5 +152,12 @@ impl Scanner {
 
         self.tokens
             .push(Token::new(token_type, text, literal, self.line));
+    }
+
+    fn peek(&self) -> char {
+        if self.is_at_end() {
+            return '\0';
+        }
+        self.source.as_bytes()[self.current] as char
     }
 }
