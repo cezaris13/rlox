@@ -312,4 +312,58 @@ mod tests {
             Some("Unterminated string at line 1\n".to_string())
         );
     }
+
+    #[test]
+    fn handler_numeral_trailing_dot_returns_int() {
+        let source = "123.";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+        assert_eq!(scanner.tokens[0].token_type, NUMBER);
+        match scanner.tokens[0].literal.as_ref().unwrap() {
+            IntValue(val) => assert_eq!(*val, 123),
+            _ => panic!("Incorrect literal"),
+        }
+    }
+
+    #[test]
+    fn handler_float_numeral_returns_float_token() {
+        let source = "123.15";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+        assert_eq!(scanner.tokens.len(), 2);
+        assert_eq!(scanner.tokens[0].token_type, NUMBER);
+        match scanner.tokens[0].literal.as_ref().unwrap() {
+            FValue(val) => assert_eq!(*val, 123.15),
+            _ => panic!("Incorrect literal"),
+        }
+
+        assert_eq!(scanner.tokens[1].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_int_numeral_returns_int_token() {
+        let source = "123";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+        assert_eq!(scanner.tokens.len(), 2);
+        assert_eq!(scanner.tokens[0].token_type, NUMBER);
+        match scanner.tokens[0].literal.as_ref().unwrap() {
+            IntValue(val) => assert_eq!(*val, 123),
+            _ => panic!("Incorrect literal"),
+        }
+
+        assert_eq!(scanner.tokens[1].token_type, EOF);
+    }
 }
