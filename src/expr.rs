@@ -2,7 +2,8 @@ use crate::token::Token;
 
 pub enum LiteralValue {
     IntValue(i64),
-    FValue(i64),
+    FValue(f64),
+    StringValue(String),
     True,
     False,
     Nil,
@@ -19,7 +20,7 @@ pub enum Expression {
         right: Box<Expression>,
     },
     Grouping {
-        operator: Box<Expression>,
+        group: Box<Expression>,
     },
     Literal {
         value: LiteralValue,
@@ -41,12 +42,13 @@ impl Expression {
                     right.to_string()
                 )
             }
-            Expression::Grouping { operator } => {
-                format!("({})", operator.to_string())
+            Expression::Grouping { group } => {
+                format!("(group {})", group.to_string())
             }
             Expression::Literal { value } => match value {
                 LiteralValue::IntValue(integer) => integer.to_string(),
                 LiteralValue::FValue(float) => float.to_string(),
+                LiteralValue::StringValue(string) => string.clone(),
                 LiteralValue::True => String::from("true"),
                 LiteralValue::False => String::from("false"),
                 LiteralValue::Nil => String::from("nil"),
@@ -59,5 +61,36 @@ impl Expression {
 
     pub fn print(&self) {
         println!("{}", self.to_string());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::expr::Expression;
+    use crate::expr::Expression::*;
+    use crate::expr::LiteralValue::*;
+    use crate::token::TokenType::*;
+
+    #[test]
+    fn pretty_print() {
+        let expression: Expression = Binary {
+            left: Box::new(Unary {
+                operator: Token::new(MINUS, String::from("-"), None, 1),
+                right: Box::new(Literal {
+                    value: IntValue(123),
+                }),
+            }),
+            operator: Token::new(STAR, String::from("*"), None, 1),
+            right: Box::new(Grouping {
+                group: Box::new(Literal {
+                    value: FValue(45.67),
+                }),
+            }),
+        };
+
+        let result = expression.to_string();
+
+        assert_eq!(result, "(* (- 123) (group 45.67))");
     }
 }
