@@ -1,7 +1,13 @@
+mod expr;
 mod scanner;
 mod token;
 
+use crate::expr::Expression;
+use crate::expr::Expression::*;
+use crate::expr::LiteralValue::*;
 use crate::scanner::Scanner;
+use crate::token::Token;
+use crate::token::TokenType::*;
 
 use std::env;
 use std::fs;
@@ -54,6 +60,22 @@ fn run(source: &str) -> Result<(), String> {
 }
 
 fn main() {
+    // region testing AST
+
+    let expression: Expression = Binary {
+        left: Box::new(Literal {
+            value: IntValue(12),
+        }),
+        operator: Token::new(STAR, String::from("*"), None, 1),
+        right: Box::new(Expression::Literal {
+            value: IntValue(12),
+        }),
+    };
+
+    expression.print();
+
+    // endregion
+
     let args: Vec<String> = env::args().collect();
 
     if args.len() > 2 {
