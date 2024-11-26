@@ -2,22 +2,45 @@ use crate::token::LiteralValue::*;
 use crate::token::TokenType::*;
 use crate::token::{LiteralValue, Token, TokenType};
 
+use std::collections::HashMap;
+
 pub struct Scanner {
     source: String,
     tokens: Vec<Token>,
     start: usize,
     current: usize,
     line: usize,
+    keywords: HashMap<String, TokenType>,
 }
 
 impl Scanner {
     pub fn new(source: &str) -> Self {
+        let mut keywords: HashMap<String, TokenType> = HashMap::new();
+
+        keywords.insert("and".to_string(), AND);
+        keywords.insert("class".to_string(), CLASS);
+        keywords.insert("else".to_string(), ELSE);
+        keywords.insert("false".to_string(), FALSE);
+        keywords.insert("for".to_string(), FOR);
+        keywords.insert("fun".to_string(), FUN);
+        keywords.insert("if".to_string(), IF);
+        keywords.insert("nil".to_string(), NIL);
+        keywords.insert("or".to_string(), OR);
+        keywords.insert("print".to_string(), PRINT);
+        keywords.insert("return".to_string(), RETURN);
+        keywords.insert("super".to_string(), SUPER);
+        keywords.insert("this".to_string(), THIS);
+        keywords.insert("true".to_string(), TRUE);
+        keywords.insert("var".to_string(), VAR);
+        keywords.insert("while".to_string(), WHILE);
+
         Self {
             source: source.to_string(),
             tokens: vec![],
             start: 0,
             current: 0,
             line: 1,
+            keywords: keywords,
         }
     }
 
@@ -236,7 +259,19 @@ impl Scanner {
             self.advance();
         }
 
-        self.add_token(IDENTIFIER);
+        let string_literal = self.source.as_bytes()[self.start..self.current]
+            .iter()
+            .map(|bytes| *bytes as char)
+            .collect::<String>();
+
+        let tokenType = self.keywords.get(&string_literal);
+
+        let tokenType = match tokenType {
+            Some(tokenVal) => tokenVal,
+            None => &IDENTIFIER,
+        };
+
+        self.add_token(tokenType.clone());
     }
 
     // endregion
@@ -473,5 +508,35 @@ mod tests {
         );
         assert_eq!(scanner.tokens.len(), 1);
         assert_eq!(scanner.tokens[0].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_keywords_returns_keyword_token() {
+        let source = "class var";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+        assert_eq!(scanner.tokens.len(), 3);
+        assert_eq!(scanner.tokens[0].token_type, CLASS);
+        assert_eq!(scanner.tokens[1].token_type, VAR);
+        assert_eq!(scanner.tokens[2].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_keywords_unindentified_token_returns_identifier_token() {
+        let source = "bigvar";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+        assert_eq!(scanner.tokens.len(), 2);
+        assert_eq!(scanner.tokens[0].token_type, IDENTIFIER);
+        assert_eq!(scanner.tokens[0].lexeme, "bigvar");
+        assert_eq!(scanner.tokens[1].token_type, EOF);
     }
 }
