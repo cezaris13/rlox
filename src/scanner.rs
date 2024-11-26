@@ -50,10 +50,6 @@ impl Scanner {
         Ok(self.tokens.clone()) // temp fix
     }
 
-    fn is_at_end(&self) -> bool {
-        self.current >= self.source.len() as usize
-    }
-
     fn scan_token(self: &mut Self) -> Result<(), String> {
         let symbol = self.advance();
 
@@ -82,7 +78,6 @@ impl Scanner {
                     self.add_token(EQUAL)
                 }
             }
-
             '<' => {
                 if self.match_character('=') {
                     self.add_token(LESS_EQUAL)
@@ -113,6 +108,8 @@ impl Scanner {
             _ => {
                 if self.is_digit(symbol) {
                     self.number()?;
+                } else if self.is_alpha(symbol) {
+                    self.identifier();
                 } else {
                     return Err(format!(
                         "Unexpected character {0} at line {1}",
@@ -123,6 +120,24 @@ impl Scanner {
         }
         Ok(())
     }
+
+    fn add_token(self: &mut Self, token_type: TokenType) {
+        self.add_token_lit(token_type, None);
+    }
+
+    fn add_token_lit(self: &mut Self, token_type: TokenType, literal: Option<LiteralValue>) {
+        let mut text: String = String::new();
+        let bytes = self.source.as_bytes();
+
+        for i in self.start..self.current {
+            text.push(bytes[i] as char);
+        }
+
+        self.tokens
+            .push(Token::new(token_type, text, literal, self.line));
+    }
+
+    // region parser function
 
     fn string(self: &mut Self) -> Result<(), String> {
         while self.peek() != '"' && !self.is_at_end() {
@@ -148,10 +163,6 @@ impl Scanner {
         self.add_token_lit(STRING, Some(StringValue(value)));
 
         Ok(())
-    }
-
-    fn is_digit(&self, symbol: char) -> bool {
-        symbol >= '0' && symbol <= '9'
     }
 
     fn number(self: &mut Self) -> Result<(), String> {
@@ -192,6 +203,35 @@ impl Scanner {
         Ok(())
     }
 
+    fn identifier(self: &mut Self) {
+        while self.is_alpha_numeric(self.peek()) {
+            self.advance();
+        }
+
+        self.add_token(IDENTIFIER);
+    }
+
+    // endregion
+
+    // region character manipulation
+
+    fn is_at_end(&self) -> bool {
+        self.current >= self.source.len() as usize
+    }
+
+    fn advance(self: &mut Self) -> char {
+        let symbol = self.source.as_bytes()[self.current];
+        self.current += 1;
+        symbol as char
+    }
+
+    fn peek(&self) -> char {
+        if self.is_at_end() {
+            return '\0';
+        }
+        self.source.as_bytes()[self.current] as char
+    }
+
     fn peek_next(&self) -> char {
         if self.current + 1 >= self.source.len() {
             return '\0';
@@ -213,34 +253,25 @@ impl Scanner {
         true
     }
 
-    fn advance(self: &mut Self) -> char {
-        let symbol = self.source.as_bytes()[self.current];
-        self.current += 1;
-        symbol as char
+    // endregion
+
+    // region helper functions
+
+    fn is_digit(&self, symbol: char) -> bool {
+        symbol >= '0' && symbol <= '9'
     }
 
-    fn add_token(self: &mut Self, token_type: TokenType) {
-        self.add_token_lit(token_type, None);
+    fn is_alpha(&self, character: char) -> bool {
+        (character >= 'a' && character <= 'z')
+            || (character >= 'A' && character <= 'Z')
+            || character == '_'
     }
 
-    fn add_token_lit(self: &mut Self, token_type: TokenType, literal: Option<LiteralValue>) {
-        let mut text: String = String::new();
-        let bytes = self.source.as_bytes();
-
-        for i in self.start..self.current {
-            text.push(bytes[i] as char);
-        }
-
-        self.tokens
-            .push(Token::new(token_type, text, literal, self.line));
+    fn is_alpha_numeric(&self, character: char) -> bool {
+        self.is_alpha(character) || self.is_digit(character)
     }
 
-    fn peek(&self) -> char {
-        if self.is_at_end() {
-            return '\0';
-        }
-        self.source.as_bytes()[self.current] as char
-    }
+    // endregion
 }
 
 #[cfg(test)]
