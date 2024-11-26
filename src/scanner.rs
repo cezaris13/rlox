@@ -63,7 +63,15 @@ impl Scanner {
             '-' => self.add_token(MINUS),
             '+' => self.add_token(PLUS),
             ';' => self.add_token(SEMICOLON),
-            '*' => self.add_token(STAR),
+            '*' => {
+                if self.match_character('/') {
+                    return Err(format!(
+                        "Extra multiline ending comment at line {0}",
+                        self.line
+                    ));
+                }
+                self.add_token(STAR)
+            }
             '!' => {
                 if self.match_character('=') {
                     self.add_token(BANG_EQUAL)
@@ -97,6 +105,26 @@ impl Scanner {
                     // A comment goes until the end of the line.
                     while self.peek() != '\n' && !self.is_at_end() {
                         self.advance();
+                    }
+                } else if self.match_character('*') {
+                    // /* comment goes until you reach this combination of symbols */
+                    while !(self.peek() == '*' && self.peek_next() == '/') && !self.is_at_end() {
+                        if self.peek() == '\n' {
+                            self.line += 1;
+                        }
+
+                        self.advance();
+                    }
+
+                    if self.is_at_end() {
+                        return Err(format!(
+                            "Unterminated multiline comment at line {0}",
+                            self.line
+                        ));
+                    } else {
+                        for _ in 0..2 {
+                            self.advance();
+                        }
                     }
                 } else {
                     self.add_token(SLASH);
@@ -396,5 +424,54 @@ mod tests {
         }
 
         assert_eq!(scanner.tokens[1].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_multiline_comments_gets_cut_of() {
+        let source = "/*some text\n\n\n*/";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        println!("{:?}", scanner.tokens);
+        assert!(result.is_ok());
+        assert_eq!(scanner.tokens.len(), 1);
+        assert_eq!(scanner.tokens[0].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_multiline_comments_unclosed_comment_returns_error() {
+        let source = "/*some text\n\n";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_err());
+        assert_eq!(
+            result.err(),
+            Some("Unterminated multiline comment at line 3\n".to_string())
+        );
+        assert_eq!(scanner.tokens.len(), 1);
+        assert_eq!(scanner.tokens[0].token_type, EOF);
+    }
+
+    #[test]
+    fn handler_multiline_comments_extra_end_comment_returns_error() {
+        let source = "*/";
+
+        let mut scanner = Scanner::new(source);
+
+        let result = scanner.scan_tokens();
+
+        println!("{:?}", scanner.tokens);
+        assert!(result.is_err());
+        assert_eq!(
+            result.err(),
+            Some("Extra multiline ending comment at line 1\n".to_string())
+        );
+        assert_eq!(scanner.tokens.len(), 1);
+        assert_eq!(scanner.tokens[0].token_type, EOF);
     }
 }
