@@ -9,6 +9,19 @@ pub enum LiteralValue {
     Nil,
 }
 
+impl LiteralValue {
+    pub fn to_string(&self) -> String {
+        match self {
+            LiteralValue::IntValue(integer) => integer.to_string(),
+            LiteralValue::FValue(float) => float.to_string(),
+            LiteralValue::StringValue(string) => string.clone(),
+            LiteralValue::True => String::from("true"),
+            LiteralValue::False => String::from("false"),
+            LiteralValue::Nil => String::from("nil"),
+        }
+    }
+}
+
 pub enum Expression {
     Binary {
         left: Box<Expression>,
@@ -45,14 +58,7 @@ impl Expression {
             Expression::Grouping { group } => {
                 format!("(group {})", group.to_string())
             }
-            Expression::Literal { value } => match value {
-                LiteralValue::IntValue(integer) => integer.to_string(),
-                LiteralValue::FValue(float) => float.to_string(),
-                LiteralValue::StringValue(string) => string.clone(),
-                LiteralValue::True => String::from("true"),
-                LiteralValue::False => String::from("false"),
-                LiteralValue::Nil => String::from("nil"),
-            },
+            Expression::Literal { value } => value.to_string(),
             Expression::Unary { operator, right } => {
                 format!("({} {})", operator.lexeme, right.to_string())
             }
