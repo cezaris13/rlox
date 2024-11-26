@@ -264,10 +264,10 @@ impl Scanner {
             .map(|bytes| *bytes as char)
             .collect::<String>();
 
-        let tokenType = self.keywords.get(&string_literal);
+        let token_type = self.keywords.get(&string_literal);
 
-        let tokenType = match tokenType {
-            Some(tokenVal) => tokenVal,
+        let token_type = match token_type {
+            Some(token_val) => token_val,
             None => &IDENTIFIER,
         };
 
