@@ -237,8 +237,6 @@ impl Scanner {
             .map(|bytes| *bytes as char)
             .collect::<String>();
 
-        println!("{}", string_literal);
-
         if is_fraction {
             match string_literal.parse::<f64>() {
                 Ok(value) => self.add_token_lit(NUMBER, Some(FValue(value))),
@@ -469,7 +467,6 @@ mod tests {
 
         let result = scanner.scan_tokens();
 
-        println!("{:?}", scanner.tokens);
         assert!(result.is_ok());
         assert_eq!(scanner.tokens.len(), 1);
         assert_eq!(scanner.tokens[0].token_type, EOF);
@@ -500,7 +497,6 @@ mod tests {
 
         let result = scanner.scan_tokens();
 
-        println!("{:?}", scanner.tokens);
         assert!(result.is_err());
         assert_eq!(
             result.err(),
@@ -538,5 +534,30 @@ mod tests {
         assert_eq!(scanner.tokens[0].token_type, IDENTIFIER);
         assert_eq!(scanner.tokens[0].lexeme, "bigvar");
         assert_eq!(scanner.tokens[1].token_type, EOF);
+    }
+
+    #[test]
+    fn get_keywords() {
+        let source = "var this_is_a_var = 12;\nwhile true { print 3 };";
+        let mut scanner = Scanner::new(source);
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+
+        assert_eq!(scanner.tokens.len(), 13);
+
+        assert_eq!(scanner.tokens[0].token_type, VAR);
+        assert_eq!(scanner.tokens[1].token_type, IDENTIFIER);
+        assert_eq!(scanner.tokens[2].token_type, EQUAL);
+        assert_eq!(scanner.tokens[3].token_type, NUMBER);
+        assert_eq!(scanner.tokens[4].token_type, SEMICOLON);
+        assert_eq!(scanner.tokens[5].token_type, WHILE);
+        assert_eq!(scanner.tokens[6].token_type, TRUE);
+        assert_eq!(scanner.tokens[7].token_type, LEFT_BRACE);
+        assert_eq!(scanner.tokens[8].token_type, PRINT);
+        assert_eq!(scanner.tokens[9].token_type, NUMBER);
+        assert_eq!(scanner.tokens[10].token_type, RIGHT_BRACE);
+        assert_eq!(scanner.tokens[11].token_type, SEMICOLON);
+        assert_eq!(scanner.tokens[12].token_type, EOF);
     }
 }
