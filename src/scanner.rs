@@ -271,7 +271,7 @@ impl Scanner {
             None => &IDENTIFIER,
         };
 
-        self.add_token(tokenType.clone());
+        self.add_token(token_type.clone());
     }
 
     // endregion
