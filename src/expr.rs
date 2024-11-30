@@ -96,7 +96,6 @@ mod tests {
         };
 
         let result = expression.to_string();
-
         assert_eq!(result, "(* (- 123) (group 45.67))");
     }
 }
