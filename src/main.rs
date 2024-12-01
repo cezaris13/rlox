@@ -52,7 +52,10 @@ fn run(source: &str) -> Result<(), String> {
     let mut parser = Parser::new(tokens);
     let expression = parser.parse()?;
 
+    let result = expression.evaluate()?;
     println!("{}", expression.to_string());
+
+    println!("{:?}", result);
 
     Ok(())
 }
