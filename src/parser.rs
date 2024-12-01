@@ -20,7 +20,7 @@ impl Parser {
 
     // region grammar components
 
-    fn expression(self: &mut Self) -> Expression {
+    pub fn expression(self: &mut Self) -> Expression {
         self.equality()
     }
 
@@ -135,21 +135,24 @@ impl Parser {
             return Grouping {
                 group: Box::new(expression),
             };
-        } else {
-            let token = self.peek();
+        }
+
+        if self.match_tokens(vec![STRING, NUMBER]) {
+            let token: Token = self.previous();
             return Literal {
                 value: LiteralValue::from_token(token),
             };
         }
+
+        // fix this
+        return Literal {
+            value: LiteralValue::Nil,
+        };
     }
 
     // endregion
 
     // region helper functions
-
-    fn previous(&self) -> Token {
-        self.tokens[self.current - 1].clone()
-    }
 
     fn match_tokens(self: &mut Self, token_types: Vec<TokenType>) -> bool {
         for token_type in token_types {
@@ -174,6 +177,10 @@ impl Parser {
         self.peek().token_type == EOF
     }
 
+    fn previous(&self) -> Token {
+        self.tokens[self.current - 1].clone()
+    }
+
     fn peek(&self) -> Token {
         self.tokens[self.current].clone()
     }
@@ -196,4 +203,75 @@ impl Parser {
     }
 
     // endregion
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::scanner::Scanner;
+    use crate::token::LiteralValue;
+
+    #[test]
+    fn test_addition() {
+        let tokens = vec![
+            Token::new(NUMBER, "1".to_string(), Some(LiteralValue::IntValue(1)), 0),
+            Token::new(PLUS, "+".to_string(), None, 0),
+            Token::new(NUMBER, "2".to_string(), Some(LiteralValue::IntValue(2)), 0),
+            Token::new(SEMICOLON, ";".to_string(), None, 0),
+        ];
+
+        let mut parser = Parser::new(tokens);
+
+        let parsed_expression = parser.expression();
+
+        assert_eq!(parsed_expression.to_string(), "(+ 1 2)");
+    }
+
+    #[test]
+    fn test_comparison() {
+        let source = "1 + 2 == 5 + 7";
+        let mut scanner: Scanner = Scanner::new(source);
+
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+
+        let expression = parser.expression();
+
+        let string_expression = expression.to_string();
+
+        assert_eq!(string_expression, "(== (+ 1 2) (+ 5 7))");
+    }
+
+    #[test]
+    fn test_bang_operator() {
+        let source = "!!2";
+        let mut scanner: Scanner = Scanner::new(source);
+
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+
+        let expression = parser.expression();
+
+        let string_expression = expression.to_string();
+
+        assert_eq!(string_expression, "(! (! 2))");
+    }
+
+    #[test]
+    fn test_factor_and_term_operators() {
+        let source = "12 / 2 + 3";
+        let mut scanner: Scanner = Scanner::new(source);
+
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+
+        let expression = parser.expression();
+
+        let string_expression = expression.to_string();
+
+        assert_eq!(string_expression, "(+ (/ 12 2) 3)");
+    }
 }
