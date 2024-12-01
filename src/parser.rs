@@ -20,17 +20,17 @@ impl Parser {
 
     // region grammar components
 
-    pub fn expression(self: &mut Self) -> Expression {
+    pub fn expression(self: &mut Self) -> Result<Expression, String> {
         self.equality()
     }
 
-    fn equality(self: &mut Self) -> Expression {
-        let mut expression: Expression = self.comparison();
+    fn equality(self: &mut Self) -> Result<Expression, String> {
+        let mut expression: Expression = self.comparison()?;
 
         while self.match_tokens(vec![BANG_EQUAL, EQUAL_EQUAL]) {
             let operator = self.previous();
 
-            let right: Expression = self.comparison();
+            let right: Expression = self.comparison()?;
 
             expression = Binary {
                 left: Box::new(expression),
@@ -39,16 +39,16 @@ impl Parser {
             }
         }
 
-        expression
+        Ok(expression)
     }
 
-    fn comparison(self: &mut Self) -> Expression {
-        let mut expression: Expression = self.term();
+    fn comparison(self: &mut Self) -> Result<Expression, String> {
+        let mut expression: Expression = self.term()?;
 
         while self.match_tokens(vec![GREATER, GREATER_EQUAL, LESS, LESS_EQUAL]) {
             let operator = self.previous();
 
-            let right = self.term();
+            let right = self.term()?;
 
             expression = Binary {
                 left: Box::new(expression),
@@ -57,16 +57,16 @@ impl Parser {
             }
         }
 
-        expression
+        Ok(expression)
     }
 
-    fn term(self: &mut Self) -> Expression {
-        let mut expression = self.factor();
+    fn term(self: &mut Self) -> Result<Expression, String> {
+        let mut expression = self.factor()?;
 
         while self.match_tokens(vec![MINUS, PLUS]) {
             let operator = self.previous();
 
-            let right = self.factor();
+            let right = self.factor()?;
 
             expression = Binary {
                 left: Box::new(expression),
@@ -75,15 +75,15 @@ impl Parser {
             }
         }
 
-        expression
+        Ok(expression)
     }
 
-    fn factor(self: &mut Self) -> Expression {
-        let mut expression = self.unary();
+    fn factor(self: &mut Self) -> Result<Expression, String> {
+        let mut expression = self.unary()?;
 
         while self.match_tokens(vec![SLASH, STAR]) {
             let operator = self.previous();
-            let right = self.unary();
+            let right = self.unary()?;
 
             expression = Binary {
                 left: Box::new(expression),
@@ -92,62 +92,60 @@ impl Parser {
             }
         }
 
-        expression
+        Ok(expression)
     }
 
-    fn unary(self: &mut Self) -> Expression {
+    fn unary(self: &mut Self) -> Result<Expression, String> {
         if self.match_tokens(vec![BANG, MINUS]) {
             let operator = self.previous();
-            let right = self.unary();
+            let right = self.unary()?;
 
-            return Unary {
+            return Ok(Unary {
                 operator: operator,
                 right: Box::new(right),
-            };
+            });
         }
 
-        return self.primary();
+        self.primary()
     }
 
-    fn primary(self: &mut Self) -> Expression {
+    fn primary(self: &mut Self) -> Result<Expression, String> {
         if self.match_tokens(vec![FALSE]) {
-            return Literal {
+            return Ok(Literal {
                 value: LiteralValue::False,
-            };
+            });
         }
 
         if self.match_tokens(vec![TRUE]) {
-            return Literal {
+            return Ok(Literal {
                 value: LiteralValue::True,
-            };
+            });
         }
         if self.match_tokens(vec![NIL]) {
-            return Literal {
+            return Ok(Literal {
                 value: LiteralValue::Nil,
-            };
+            });
         }
 
         if self.match_tokens(vec![LEFT_PAREN]) {
-            let expression = self.expression();
+            let expression = self.expression()?;
 
-            self.consume(RIGHT_PAREN, "Expected )");
+            self.consume(RIGHT_PAREN, "Expected )")?;
 
-            return Grouping {
+            return Ok(Grouping {
                 group: Box::new(expression),
-            };
+            });
         }
 
         if self.match_tokens(vec![STRING, NUMBER]) {
             let token: Token = self.previous();
-            return Literal {
+            return Ok(Literal {
                 value: LiteralValue::from_token(token),
-            };
+            });
         }
 
-        // fix this
-        return Literal {
-            value: LiteralValue::Nil,
-        };
+        // TODO: fix in the future
+        Err(String::from("not implemented yet"))
     }
 
     // endregion
@@ -192,14 +190,16 @@ impl Parser {
         self.previous()
     }
 
-    fn consume(self: &mut Self, token_type: TokenType, message: &str) {
+    fn consume(self: &mut Self, token_type: TokenType, message: &str) -> Result<(), String> {
         let token = self.peek();
 
         if token.token_type == token_type {
             self.advance();
         } else {
-            panic!("{}", message);
+            return Err(message.to_string());
         }
+
+        Ok(())
     }
 
     // endregion
@@ -224,7 +224,8 @@ mod tests {
 
         let parsed_expression = parser.expression();
 
-        assert_eq!(parsed_expression.to_string(), "(+ 1 2)");
+        assert!(parsed_expression.is_ok());
+        assert_eq!(parsed_expression.unwrap().to_string(), "(+ 1 2)");
     }
 
     #[test]
@@ -238,7 +239,8 @@ mod tests {
 
         let expression = parser.expression();
 
-        let string_expression = expression.to_string();
+        assert!(expression.is_ok());
+        let string_expression = expression.unwrap().to_string();
 
         assert_eq!(string_expression, "(== (+ 1 2) (+ 5 7))");
     }
@@ -254,7 +256,8 @@ mod tests {
 
         let expression = parser.expression();
 
-        let string_expression = expression.to_string();
+        assert!(expression.is_ok());
+        let string_expression = expression.unwrap().to_string();
 
         assert_eq!(string_expression, "(! (! 2))");
     }
@@ -270,7 +273,9 @@ mod tests {
 
         let expression = parser.expression();
 
-        let string_expression = expression.to_string();
+        assert!(expression.is_ok());
+
+        let string_expression = expression.unwrap().to_string();
 
         assert_eq!(string_expression, "(+ (/ 12 2) 3)");
     }
