@@ -1,4 +1,5 @@
 use crate::token::Token;
+use crate::token::TokenType::*;
 
 pub enum LiteralValue {
     IntValue(i64),
@@ -18,6 +19,29 @@ impl LiteralValue {
             LiteralValue::True => String::from("true"),
             LiteralValue::False => String::from("false"),
             LiteralValue::Nil => String::from("nil"),
+        }
+    }
+
+    pub fn from_token(token: Token) -> Self {
+        match token.token_type {
+            NUMBER => match token.literal {
+                Some(crate::token::LiteralValue::IntValue(int_value)) => Self::IntValue(int_value),
+                Some(crate::token::LiteralValue::FValue(float_value)) => Self::FValue(float_value),
+                _ => panic!("Could not unwrap as number"),
+            },
+            STRING => match token.literal {
+                Some(crate::token::LiteralValue::StringValue(string_value)) => {
+                    Self::StringValue(string_value)
+                }
+                Some(crate::token::LiteralValue::IdentifierValue(id_value)) => {
+                    Self::StringValue(id_value)
+                }
+                _ => panic!("Could not unwrap as String"),
+            },
+            FALSE => Self::False,
+            TRUE => Self::True,
+            NIL => Self::Nil,
+            _ => panic!("Could not create literal calue from {:?}", token),
         }
     }
 }

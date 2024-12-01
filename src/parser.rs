@@ -18,6 +18,8 @@ impl Parser {
         }
     }
 
+    // region grammar components
+
     fn expression(self: &mut Self) -> Expression {
         self.equality()
     }
@@ -125,24 +127,25 @@ impl Parser {
             };
         }
 
-        if self.match_tokens(vec![NUMBER, STRING]) {
-            return Literal {
-                value: self.previous().literal.unwrap_unchecked(),
-            };
-        }
-
         if self.match_tokens(vec![LEFT_PAREN]) {
             let expression = self.expression();
 
+            self.consume(RIGHT_PAREN, "Expected )");
+
+            return Grouping {
+                group: Box::new(expression),
+            };
+        } else {
+            let token = self.peek();
             return Literal {
-                value: self.previous().literal.unwrap_unchecked(),
+                value: LiteralValue::from_token(token),
             };
         }
-
-        return Literal {
-            value: LiteralValue::Nil,
-        };
     }
+
+    // endregion
+
+    // region helper functions
 
     fn previous(&self) -> Token {
         self.tokens[self.current - 1].clone()
@@ -182,7 +185,15 @@ impl Parser {
         self.previous()
     }
 
-    fn consume(self: &mut Self, token_type: TokenType, message: String) -> Token {
-        todo!()
+    fn consume(self: &mut Self, token_type: TokenType, message: &str) {
+        let token = self.peek();
+
+        if token.token_type == token_type {
+            self.advance();
+        } else {
+            panic!("{}", message);
+        }
     }
+
+    // endregion
 }
