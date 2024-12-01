@@ -158,6 +158,9 @@ impl Expression {
                         Ok(LiteralValue::IntValue(x * y))
                     }
                     (SLASH, LiteralValue::IntValue(x), LiteralValue::IntValue(y)) => {
+                        if *y == 0 {
+                            return Err(String::from("Division by 0"));
+                        }
                         Ok(LiteralValue::IntValue(x / y))
                     }
                     (PLUS, LiteralValue::FValue(x), LiteralValue::FValue(y)) => {
@@ -170,6 +173,9 @@ impl Expression {
                         Ok(LiteralValue::FValue(x * y))
                     }
                     (SLASH, LiteralValue::FValue(x), LiteralValue::FValue(y)) => {
+                        if *y == 0.0 {
+                            return Err(String::from("Division by 0"));
+                        }
                         Ok(LiteralValue::FValue(x / y))
                     }
                     (PLUS, LiteralValue::IntValue(x), LiteralValue::FValue(y)) => {
@@ -182,6 +188,9 @@ impl Expression {
                         Ok(LiteralValue::FValue((*x as f64) * y))
                     }
                     (SLASH, LiteralValue::IntValue(x), LiteralValue::FValue(y)) => {
+                        if *y == 0.0 {
+                            return Err(String::from("Division by 0"));
+                        }
                         Ok(LiteralValue::FValue((*x as f64) / y))
                     }
                     (PLUS, LiteralValue::FValue(x), LiteralValue::IntValue(y)) => {
@@ -194,6 +203,9 @@ impl Expression {
                         Ok(LiteralValue::FValue(x * (*y as f64)))
                     }
                     (SLASH, LiteralValue::FValue(x), LiteralValue::IntValue(y)) => {
+                        if *y == 0 {
+                            return Err(String::from("Division by 0"));
+                        }
                         Ok(LiteralValue::FValue(x / (*y as f64)))
                     }
                     (PLUS, LiteralValue::StringValue(string), any) => Ok(
@@ -202,17 +214,84 @@ impl Expression {
                     (PLUS, any, LiteralValue::StringValue(string)) => Ok(
                         LiteralValue::StringValue(format!("{0}{1}", any.to_string(), string)),
                     ),
-
-                    (BANG_EQUAL, lit1, lit2) => Ok(self.is_equal(lit1, lit2)),
-
-                    _ => todo!(),
+                    (GREATER, LiteralValue::IntValue(x), LiteralValue::IntValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x > y))
+                    }
+                    (GREATER, LiteralValue::FValue(x), LiteralValue::FValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x > y))
+                    }
+                    (GREATER, LiteralValue::IntValue(x), LiteralValue::FValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(*x as f64 > *y))
+                    }
+                    (GREATER, LiteralValue::FValue(x), LiteralValue::IntValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(*x > *y as f64))
+                    }
+                    (GREATER, LiteralValue::StringValue(x), LiteralValue::StringValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x.len() > y.len()))
+                    }
+                    (GREATER_EQUAL, LiteralValue::IntValue(x), LiteralValue::IntValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x >= y))
+                    }
+                    (GREATER_EQUAL, LiteralValue::FValue(x), LiteralValue::FValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x >= y))
+                    }
+                    (GREATER_EQUAL, LiteralValue::IntValue(x), LiteralValue::FValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(*x as f64 >= *y))
+                    }
+                    (GREATER_EQUAL, LiteralValue::FValue(x), LiteralValue::IntValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(*x >= *y as f64))
+                    }
+                    (GREATER_EQUAL, LiteralValue::StringValue(x), LiteralValue::StringValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x.len() >= y.len()))
+                    }
+                    (LESS, LiteralValue::IntValue(x), LiteralValue::IntValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x < y))
+                    }
+                    (LESS, LiteralValue::FValue(x), LiteralValue::FValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x < y))
+                    }
+                    (LESS, LiteralValue::IntValue(x), LiteralValue::FValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool((*x as f64) < *y))
+                    }
+                    (LESS, LiteralValue::FValue(x), LiteralValue::IntValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(*x < *y as f64))
+                    }
+                    (LESS, LiteralValue::StringValue(x), LiteralValue::StringValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x.len() < y.len()))
+                    }
+                    (LESS_EQUAL, LiteralValue::IntValue(x), LiteralValue::IntValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x <= y))
+                    }
+                    (LESS_EQUAL, LiteralValue::FValue(x), LiteralValue::FValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x <= y))
+                    }
+                    (LESS_EQUAL, LiteralValue::IntValue(x), LiteralValue::FValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(*x as f64 <= *y))
+                    }
+                    (LESS_EQUAL, LiteralValue::FValue(x), LiteralValue::IntValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(*x <= *y as f64))
+                    }
+                    (LESS_EQUAL, LiteralValue::StringValue(x), LiteralValue::StringValue(y)) => {
+                        Ok(self.bool_to_literal_value_bool(x.len() <= y.len()))
+                    }
+                    (BANG_EQUAL, lit1, lit2) => Ok(self.bool_to_literal_value_bool(lit1 != lit2)),
+                    (EQUAL_EQUAL, lit1, lit2) => Ok(self.bool_to_literal_value_bool(lit1 == lit2)),
+                    _ => Err(format!(
+                        "{:?} operation is not implementer for: {:?} and {:?}",
+                        operator.token_type,
+                        left.to_string(),
+                        right.to_string()
+                    )),
                 }
             }
         };
     }
 
-    fn is_equal(&self, lit1: &LiteralValue, lit2: &LiteralValue) -> LiteralValue {
-        todo!()
+    fn bool_to_literal_value_bool(&self, boolean: bool) -> LiteralValue {
+        if boolean {
+            return LiteralValue::True;
+        }
+        LiteralValue::False
     }
 
     fn print(&self) {
