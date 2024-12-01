@@ -5,7 +5,7 @@ use crate::token::Token;
 use crate::token::TokenType;
 use crate::token::TokenType::*;
 
-struct Parser {
+pub struct Parser {
     tokens: Vec<Token>,
     current: usize,
 }
@@ -20,7 +20,11 @@ impl Parser {
 
     // region grammar components
 
-    pub fn expression(self: &mut Self) -> Result<Expression, String> {
+    pub fn parse(&mut self) -> Result<Expression, String> {
+        self.expression()
+    }
+
+    fn expression(self: &mut Self) -> Result<Expression, String> {
         self.equality()
     }
 
@@ -144,8 +148,27 @@ impl Parser {
             });
         }
 
-        // TODO: fix in the future
-        Err(String::from("not implemented yet"))
+        Err(String::from(format!(
+            "Expected expression at line: {}, literal: {1}",
+            self.peek().line,
+            self.peek().lexeme
+        )))
+    }
+
+    fn synchronize(&mut self) {
+        self.advance();
+
+        while !self.is_at_end() {
+            if self.previous().token_type == SEMICOLON {
+                return;
+            }
+            match self.peek().token_type {
+                CLASS | FUN | VAR | FOR | IF | WHILE | PRINT | RETURN => return,
+                _ => {}
+            }
+
+            self.advance();
+        }
     }
 
     // endregion
@@ -193,12 +216,11 @@ impl Parser {
     fn consume(self: &mut Self, token_type: TokenType, message: &str) -> Result<(), String> {
         let token = self.peek();
 
-        if token.token_type == token_type {
-            self.advance();
-        } else {
+        if token.token_type != token_type {
             return Err(message.to_string());
         }
 
+        self.advance();
         Ok(())
     }
 
@@ -222,7 +244,7 @@ mod tests {
 
         let mut parser = Parser::new(tokens);
 
-        let parsed_expression = parser.expression();
+        let parsed_expression = parser.parse();
 
         assert!(parsed_expression.is_ok());
         assert_eq!(parsed_expression.unwrap().to_string(), "(+ 1 2)");
@@ -237,7 +259,7 @@ mod tests {
 
         let mut parser = Parser::new(tokens);
 
-        let expression = parser.expression();
+        let expression = parser.parse();
 
         assert!(expression.is_ok());
         let string_expression = expression.unwrap().to_string();
@@ -254,7 +276,7 @@ mod tests {
 
         let mut parser = Parser::new(tokens);
 
-        let expression = parser.expression();
+        let expression = parser.parse();
 
         assert!(expression.is_ok());
         let string_expression = expression.unwrap().to_string();
@@ -271,7 +293,7 @@ mod tests {
 
         let mut parser = Parser::new(tokens);
 
-        let expression = parser.expression();
+        let expression = parser.parse();
 
         assert!(expression.is_ok());
 
