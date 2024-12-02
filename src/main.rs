@@ -1,8 +1,10 @@
 mod expr;
+mod interpreter;
 mod parser;
 mod scanner;
 mod token;
 
+use crate::interpreter::Interpreter;
 use crate::parser::Parser;
 use crate::scanner::Scanner;
 
@@ -12,13 +14,15 @@ use std::io::{stdin, stdout, Write};
 use std::process::exit;
 
 fn run_file(path: &str) -> Result<(), String> {
+    let mut interpreter: Interpreter = Interpreter::new();
     match fs::read_to_string(path) {
         Err(message) => return Err(message.to_string()),
-        Ok(contents) => return run(&contents),
+        Ok(contents) => return run(&mut interpreter, &contents),
     }
 }
 
 fn run_prompt() -> Result<(), String> {
+    let mut interpreter: Interpreter = Interpreter::new();
     let mut input: String;
 
     loop {
@@ -41,21 +45,23 @@ fn run_prompt() -> Result<(), String> {
             break Ok(());
         }
 
-        run(&input)?
+        match run(&mut interpreter, &input) {
+            Ok(_) => (),
+            Err(message) => println!("{}", message),
+        }
     }
 }
 
-fn run(source: &str) -> Result<(), String> {
+fn run(interpreter: &mut Interpreter, source: &str) -> Result<(), String> {
     let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens()?;
 
     let mut parser = Parser::new(tokens);
     let expression = parser.parse()?;
 
-    let result = expression.evaluate()?;
-    println!("{}", expression.to_string());
+    let result = interpreter.interpret(expression)?;
 
-    println!("{:?}", result);
+    println!("{}", result.to_string());
 
     Ok(())
 }

@@ -27,6 +27,16 @@ impl LiteralValue {
         }
     }
 
+    pub fn to_type(&self) -> &str {
+        match self {
+            IntValue(_) => "Int",
+            FValue(_) => "Float",
+            Self::True | Self::False => "Bool",
+            StringValue(_) => "String",
+            Self::Nil => "Nil",
+        }
+    }
+
     pub fn from_token(token: Token) -> Self {
         match token.token_type {
             TokenType::Number => match token.literal {
@@ -120,6 +130,12 @@ impl Expression {
         }
     }
 
+    fn print(&self) {
+        println!("{}", self.to_string());
+    }
+
+    // region evaluation
+
     pub fn evaluate(&self) -> Result<LiteralValue, String> {
         return match self {
             Expression::Literal { value } => Ok(value.clone()),
@@ -131,14 +147,14 @@ impl Expression {
                     (IntValue(value), Minus) => Ok(IntValue(-value)),
                     (FValue(value), Minus) => Ok(FValue(-value)),
                     (_, Minus) => {
-                        return Err(format!("Minus not implemented for {}", right.to_string()))
+                        return Err(format!("Minus not implemented for {}", right.to_type()))
                     }
                     (any, Bang) => Ok(any.is_falsy()),
                     _ => {
                         return Err(format!(
                             "Any othe non unary operator {:?} is not implemented for {}",
                             operator.token_type,
-                            right.to_string(),
+                            right.to_type(),
                         ))
                     }
                 }
@@ -255,9 +271,7 @@ impl Expression {
             (FValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(x > y)),
             (IntValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(*x as f64 > *y)),
             (FValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(*x > *y as f64)),
-            (StringValue(x), StringValue(y)) => {
-                Ok(self.bool_to_literal_value_bool(x.len() > y.len()))
-            }
+            (StringValue(x), StringValue(y)) => Ok(self.bool_to_literal_value_bool(x > y)),
             _ => self.not_implemented_error(&Greater, &left, &right),
         }
     }
@@ -272,9 +286,7 @@ impl Expression {
             (FValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(x >= y)),
             (IntValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(*x as f64 >= *y)),
             (FValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(*x >= *y as f64)),
-            (StringValue(x), StringValue(y)) => {
-                Ok(self.bool_to_literal_value_bool(x.len() >= y.len()))
-            }
+            (StringValue(x), StringValue(y)) => Ok(self.bool_to_literal_value_bool(x >= y)),
             _ => self.not_implemented_error(&GreaterEqual, &left, &right),
         }
     }
@@ -289,9 +301,7 @@ impl Expression {
             (FValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(x < y)),
             (IntValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool((*x as f64) < *y)),
             (FValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(*x < *y as f64)),
-            (StringValue(x), StringValue(y)) => {
-                Ok(self.bool_to_literal_value_bool(x.len() < y.len()))
-            }
+            (StringValue(x), StringValue(y)) => Ok(self.bool_to_literal_value_bool(x < y)),
             _ => self.not_implemented_error(&Less, &left, &right),
         }
     }
@@ -306,9 +316,7 @@ impl Expression {
             (FValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(x <= y)),
             (IntValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(*x as f64 <= *y)),
             (FValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(*x <= *y as f64)),
-            (StringValue(x), StringValue(y)) => {
-                Ok(self.bool_to_literal_value_bool(x.len() <= y.len()))
-            }
+            (StringValue(x), StringValue(y)) => Ok(self.bool_to_literal_value_bool(x <= y)),
             _ => self.not_implemented_error(&LessEqual, &left, &right),
         }
     }
@@ -318,10 +326,6 @@ impl Expression {
             return LiteralValue::True;
         }
         LiteralValue::False
-    }
-
-    fn print(&self) {
-        println!("{}", self.to_string());
     }
 
     fn not_implemented_error(
@@ -337,6 +341,8 @@ impl Expression {
             right.to_string()
         ));
     }
+
+    // endregion
 }
 
 #[cfg(test)]
@@ -381,7 +387,7 @@ mod tests {
 
         assert!(evaluation.is_ok());
 
-        assert_eq!(evaluation.unwrap(), True);
+        assert_eq!(evaluation.unwrap(), LiteralValue::True);
     }
 
     #[test]
@@ -397,7 +403,7 @@ mod tests {
 
         assert!(evaluation.is_ok());
 
-        assert_eq!(evaluation.unwrap(), False);
+        assert_eq!(evaluation.unwrap(), LiteralValue::False);
     }
 
     #[test]
@@ -499,5 +505,19 @@ mod tests {
         let evaluation = expression.unwrap().evaluate();
 
         assert_eq!(evaluation.unwrap(), FValue(7.0));
+    }
+
+    #[test]
+    fn evaluate_comparison_of_strings_of_same_length() {
+        let source = "\"ac\" < \"ab\"";
+        let mut scanner: Scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+        let mut parser = Parser::new(tokens);
+        let expression = parser.parse();
+
+        assert!(expression.is_ok());
+        let evaluation = expression.unwrap().evaluate();
+
+        assert_eq!(evaluation.unwrap(), LiteralValue::False);
     }
 }
