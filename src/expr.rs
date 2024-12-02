@@ -3,6 +3,8 @@ use crate::token::Token;
 use crate::token::TokenType;
 use crate::token::TokenType::*;
 
+use std::string::String;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum LiteralValue {
     IntValue(i64),
@@ -19,20 +21,20 @@ impl LiteralValue {
             IntValue(integer) => integer.to_string(),
             FValue(float) => float.to_string(),
             StringValue(string) => string.clone(),
-            True => String::from("true"),
-            False => String::from("false"),
-            Nil => String::from("nil"),
+            Self::True => String::from("true"),
+            Self::False => String::from("false"),
+            Self::Nil => String::from("nil"),
         }
     }
 
     pub fn from_token(token: Token) -> Self {
         match token.token_type {
-            NUMBER => match token.literal {
+            TokenType::Number => match token.literal {
                 Some(crate::token::LiteralValue::IntValue(int_value)) => IntValue(int_value),
                 Some(crate::token::LiteralValue::FValue(float_value)) => FValue(float_value),
                 _ => panic!("Could not unwrap as number"),
             },
-            STRING => match token.literal {
+            TokenType::String => match token.literal {
                 Some(crate::token::LiteralValue::StringValue(string_value)) => {
                     StringValue(string_value)
                 }
@@ -41,9 +43,9 @@ impl LiteralValue {
                 }
                 _ => panic!("Could not unwrap as String"),
             },
-            FALSE => False,
-            TRUE => True,
-            NIL => Nil,
+            TokenType::False => Self::False,
+            TokenType::True => Self::True,
+            TokenType::Nil => Self::Nil,
             _ => panic!("Could not create literal calue from {:?}", token),
         }
     }
@@ -54,23 +56,23 @@ impl LiteralValue {
                 if *x == 0 {
                     return Self::True;
                 }
-                False
+                Self::False
             }
             FValue(x) => {
                 if *x == 0.0 {
-                    return True;
+                    return Self::True;
                 }
-                False
+                Self::False
             }
-            True => False,
-            False => True,
+            Self::True => Self::False,
+            Self::False => Self::True,
             StringValue(string) => {
                 if string.len() == 0 {
-                    return True;
+                    return Self::True;
                 }
-                False
+                Self::False
             }
-            Nil => True,
+            Self::Nil => Self::True,
         }
     }
 }
@@ -126,12 +128,12 @@ impl Expression {
                 let right = (*right).evaluate()?;
 
                 match (&right, &operator.token_type) {
-                    (IntValue(value), MINUS) => Ok(IntValue(-value)),
-                    (FValue(value), MINUS) => Ok(FValue(-value)),
-                    (_, MINUS) => {
+                    (IntValue(value), Minus) => Ok(IntValue(-value)),
+                    (FValue(value), Minus) => Ok(FValue(-value)),
+                    (_, Minus) => {
                         return Err(format!("Minus not implemented for {}", right.to_string()))
                     }
-                    (any, BANG) => Ok(any.is_falsy()),
+                    (any, Bang) => Ok(any.is_falsy()),
                     _ => {
                         return Err(format!(
                             "Any othe non unary operator {:?} is not implemented for {}",
@@ -150,16 +152,16 @@ impl Expression {
                 let right = (*right).evaluate()?;
 
                 match &operator.token_type {
-                    PLUS => self.process_plus_operator(left, right),
-                    MINUS => self.process_minus_operator(left, right),
-                    STAR => self.process_star_operator(left, right),
-                    SLASH => self.process_slash_operator(left, right),
-                    GREATER => self.process_greater_operator(left, right),
-                    GREATER_EQUAL => self.process_greater_equal_operator(left, right),
-                    LESS => self.process_less_operator(left, right),
-                    LESS_EQUAL => self.process_less_equal_operator(left, right),
-                    BANG_EQUAL => Ok(self.bool_to_literal_value_bool(left != right)),
-                    EQUAL_EQUAL => Ok(self.bool_to_literal_value_bool(left == right)),
+                    Plus => self.process_plus_operator(left, right),
+                    Minus => self.process_minus_operator(left, right),
+                    Star => self.process_star_operator(left, right),
+                    Slash => self.process_slash_operator(left, right),
+                    Greater => self.process_greater_operator(left, right),
+                    GreaterEqual => self.process_greater_equal_operator(left, right),
+                    Less => self.process_less_operator(left, right),
+                    LessEqual => self.process_less_equal_operator(left, right),
+                    BangEqual => Ok(self.bool_to_literal_value_bool(left != right)),
+                    EqualEqual => Ok(self.bool_to_literal_value_bool(left == right)),
                     _ => self.not_implemented_error(&operator.token_type, &left, &right),
                 }
             }
@@ -182,7 +184,7 @@ impl Expression {
             (any, StringValue(string)) => {
                 Ok(StringValue(format!("{0}{1}", any.to_string(), string)))
             }
-            _ => self.not_implemented_error(&PLUS, &left, &right),
+            _ => self.not_implemented_error(&Plus, &left, &right),
         }
     }
 
@@ -196,7 +198,7 @@ impl Expression {
             (FValue(x), FValue(y)) => Ok(FValue(x - y)),
             (IntValue(x), FValue(y)) => Ok(FValue((*x as f64) - y)),
             (FValue(x), IntValue(y)) => Ok(FValue(x - (*y as f64))),
-            _ => self.not_implemented_error(&MINUS, &left, &right),
+            _ => self.not_implemented_error(&Minus, &left, &right),
         }
     }
 
@@ -210,7 +212,7 @@ impl Expression {
             (FValue(x), FValue(y)) => Ok(FValue(x * y)),
             (IntValue(x), FValue(y)) => Ok(FValue((*x as f64) * y)),
             (FValue(x), IntValue(y)) => Ok(FValue(x * (*y as f64))),
-            _ => self.not_implemented_error(&STAR, &left, &right),
+            _ => self.not_implemented_error(&Star, &left, &right),
         }
     }
 
@@ -239,7 +241,7 @@ impl Expression {
             (FValue(x), FValue(y)) => Ok(FValue(x / y)),
             (IntValue(x), FValue(y)) => Ok(FValue((*x as f64) / y)),
             (FValue(x), IntValue(y)) => Ok(FValue(x / (*y as f64))),
-            _ => self.not_implemented_error(&SLASH, &left, &right),
+            _ => self.not_implemented_error(&Slash, &left, &right),
         }
     }
 
@@ -256,7 +258,7 @@ impl Expression {
             (StringValue(x), StringValue(y)) => {
                 Ok(self.bool_to_literal_value_bool(x.len() > y.len()))
             }
-            _ => self.not_implemented_error(&GREATER, &left, &right),
+            _ => self.not_implemented_error(&Greater, &left, &right),
         }
     }
 
@@ -273,7 +275,7 @@ impl Expression {
             (StringValue(x), StringValue(y)) => {
                 Ok(self.bool_to_literal_value_bool(x.len() >= y.len()))
             }
-            _ => self.not_implemented_error(&GREATER_EQUAL, &left, &right),
+            _ => self.not_implemented_error(&GreaterEqual, &left, &right),
         }
     }
 
@@ -290,7 +292,7 @@ impl Expression {
             (StringValue(x), StringValue(y)) => {
                 Ok(self.bool_to_literal_value_bool(x.len() < y.len()))
             }
-            _ => self.not_implemented_error(&LESS, &left, &right),
+            _ => self.not_implemented_error(&Less, &left, &right),
         }
     }
 
@@ -307,15 +309,15 @@ impl Expression {
             (StringValue(x), StringValue(y)) => {
                 Ok(self.bool_to_literal_value_bool(x.len() <= y.len()))
             }
-            _ => self.not_implemented_error(&LESS_EQUAL, &left, &right),
+            _ => self.not_implemented_error(&LessEqual, &left, &right),
         }
     }
 
     fn bool_to_literal_value_bool(&self, boolean: bool) -> LiteralValue {
         if boolean {
-            return True;
+            return LiteralValue::True;
         }
-        False
+        LiteralValue::False
     }
 
     fn print(&self) {
@@ -342,8 +344,6 @@ mod tests {
     use super::*;
     use crate::expr::Expression;
     use crate::expr::Expression::*;
-    use crate::expr::LiteralValue::*;
-    use crate::token::TokenType::*;
     use crate::Parser;
     use crate::Scanner;
 
@@ -351,12 +351,12 @@ mod tests {
     fn pretty_print() {
         let expression: Expression = Binary {
             left: Box::new(Unary {
-                operator: Token::new(MINUS, String::from("-"), None, 1),
+                operator: Token::new(Minus, String::from("-"), None, 1),
                 right: Box::new(Literal {
                     value: IntValue(123),
                 }),
             }),
-            operator: Token::new(STAR, String::from("*"), None, 1),
+            operator: Token::new(Star, String::from("*"), None, 1),
             right: Box::new(Grouping {
                 group: Box::new(Literal {
                     value: FValue(45.67),

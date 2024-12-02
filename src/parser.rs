@@ -5,6 +5,8 @@ use crate::token::Token;
 use crate::token::TokenType;
 use crate::token::TokenType::*;
 
+use std::string::String;
+
 pub struct Parser {
     tokens: Vec<Token>,
     current: usize,
@@ -31,7 +33,7 @@ impl Parser {
     fn equality(self: &mut Self) -> Result<Expression, String> {
         let mut expression: Expression = self.comparison()?;
 
-        while self.match_tokens(vec![BANG_EQUAL, EQUAL_EQUAL]) {
+        while self.match_tokens(vec![BangEqual, EqualEqual]) {
             let operator = self.previous();
 
             let right: Expression = self.comparison()?;
@@ -49,7 +51,7 @@ impl Parser {
     fn comparison(self: &mut Self) -> Result<Expression, String> {
         let mut expression: Expression = self.term()?;
 
-        while self.match_tokens(vec![GREATER, GREATER_EQUAL, LESS, LESS_EQUAL]) {
+        while self.match_tokens(vec![Greater, GreaterEqual, Less, LessEqual]) {
             let operator = self.previous();
 
             let right = self.term()?;
@@ -67,7 +69,7 @@ impl Parser {
     fn term(self: &mut Self) -> Result<Expression, String> {
         let mut expression = self.factor()?;
 
-        while self.match_tokens(vec![MINUS, PLUS]) {
+        while self.match_tokens(vec![Minus, Plus]) {
             let operator = self.previous();
 
             let right = self.factor()?;
@@ -85,7 +87,7 @@ impl Parser {
     fn factor(self: &mut Self) -> Result<Expression, String> {
         let mut expression = self.unary()?;
 
-        while self.match_tokens(vec![SLASH, STAR]) {
+        while self.match_tokens(vec![Slash, Star]) {
             let operator = self.previous();
             let right = self.unary()?;
 
@@ -100,7 +102,7 @@ impl Parser {
     }
 
     fn unary(self: &mut Self) -> Result<Expression, String> {
-        if self.match_tokens(vec![BANG, MINUS]) {
+        if self.match_tokens(vec![Bang, Minus]) {
             let operator = self.previous();
             let right = self.unary()?;
 
@@ -114,34 +116,34 @@ impl Parser {
     }
 
     fn primary(self: &mut Self) -> Result<Expression, String> {
-        if self.match_tokens(vec![FALSE]) {
+        if self.match_tokens(vec![False]) {
             return Ok(Literal {
                 value: LiteralValue::False,
             });
         }
 
-        if self.match_tokens(vec![TRUE]) {
+        if self.match_tokens(vec![True]) {
             return Ok(Literal {
                 value: LiteralValue::True,
             });
         }
-        if self.match_tokens(vec![NIL]) {
+        if self.match_tokens(vec![Nil]) {
             return Ok(Literal {
                 value: LiteralValue::Nil,
             });
         }
 
-        if self.match_tokens(vec![LEFT_PAREN]) {
+        if self.match_tokens(vec![LeftParen]) {
             let expression = self.expression()?;
 
-            self.consume(RIGHT_PAREN, "Expected )")?;
+            self.consume(RightParen, "Expected )")?;
 
             return Ok(Grouping {
                 group: Box::new(expression),
             });
         }
 
-        if self.match_tokens(vec![STRING, NUMBER]) {
+        if self.match_tokens(vec![String, Number]) {
             let token: Token = self.previous();
             return Ok(Literal {
                 value: LiteralValue::from_token(token),
@@ -159,11 +161,11 @@ impl Parser {
         self.advance();
 
         while !self.is_at_end() {
-            if self.previous().token_type == SEMICOLON {
+            if self.previous().token_type == Semicolon {
                 return;
             }
             match self.peek().token_type {
-                CLASS | FUN | VAR | FOR | IF | WHILE | PRINT | RETURN => return,
+                Class | Fun | Var | For | If | While | Print | Return => return,
                 _ => {}
             }
 
@@ -195,7 +197,7 @@ impl Parser {
     }
 
     fn is_at_end(&self) -> bool {
-        self.peek().token_type == EOF
+        self.peek().token_type == Eof
     }
 
     fn previous(&self) -> Token {
@@ -236,10 +238,10 @@ mod tests {
     #[test]
     fn test_addition() {
         let tokens = vec![
-            Token::new(NUMBER, "1".to_string(), Some(LiteralValue::IntValue(1)), 0),
-            Token::new(PLUS, "+".to_string(), None, 0),
-            Token::new(NUMBER, "2".to_string(), Some(LiteralValue::IntValue(2)), 0),
-            Token::new(SEMICOLON, ";".to_string(), None, 0),
+            Token::new(Number, "1".to_string(), Some(LiteralValue::IntValue(1)), 0),
+            Token::new(Plus, "+".to_string(), None, 0),
+            Token::new(Number, "2".to_string(), Some(LiteralValue::IntValue(2)), 0),
+            Token::new(Semicolon, ";".to_string(), None, 0),
         ];
 
         let mut parser = Parser::new(tokens);

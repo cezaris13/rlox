@@ -3,6 +3,7 @@ use crate::token::TokenType::*;
 use crate::token::{LiteralValue, Token, TokenType};
 
 use std::collections::HashMap;
+use std::string::String;
 
 pub struct Scanner {
     source: String,
@@ -17,22 +18,22 @@ impl Scanner {
     pub fn new(source: &str) -> Self {
         let mut keywords: HashMap<String, TokenType> = HashMap::new();
 
-        keywords.insert("and".to_string(), AND);
-        keywords.insert("class".to_string(), CLASS);
-        keywords.insert("else".to_string(), ELSE);
-        keywords.insert("false".to_string(), FALSE);
-        keywords.insert("for".to_string(), FOR);
-        keywords.insert("fun".to_string(), FUN);
-        keywords.insert("if".to_string(), IF);
-        keywords.insert("nil".to_string(), NIL);
-        keywords.insert("or".to_string(), OR);
-        keywords.insert("print".to_string(), PRINT);
-        keywords.insert("return".to_string(), RETURN);
-        keywords.insert("super".to_string(), SUPER);
-        keywords.insert("this".to_string(), THIS);
-        keywords.insert("true".to_string(), TRUE);
-        keywords.insert("var".to_string(), VAR);
-        keywords.insert("while".to_string(), WHILE);
+        keywords.insert("and".to_string(), And);
+        keywords.insert("class".to_string(), Class);
+        keywords.insert("else".to_string(), Else);
+        keywords.insert("false".to_string(), False);
+        keywords.insert("for".to_string(), For);
+        keywords.insert("fun".to_string(), Fun);
+        keywords.insert("if".to_string(), If);
+        keywords.insert("nil".to_string(), Nil);
+        keywords.insert("or".to_string(), Or);
+        keywords.insert("print".to_string(), Print);
+        keywords.insert("return".to_string(), Return);
+        keywords.insert("super".to_string(), Super);
+        keywords.insert("this".to_string(), This);
+        keywords.insert("true".to_string(), True);
+        keywords.insert("var".to_string(), Var);
+        keywords.insert("while".to_string(), While);
 
         Self {
             source: source.to_string(),
@@ -56,7 +57,7 @@ impl Scanner {
         }
 
         self.tokens
-            .push(Token::new(EOF, "".to_string(), None, self.line));
+            .push(Token::new(Eof, "".to_string(), None, self.line));
 
         if errors.len() > 0 {
             let mut joined = String::new();
@@ -77,15 +78,15 @@ impl Scanner {
         let symbol = self.advance();
 
         match symbol {
-            '(' => self.add_token(LEFT_PAREN),
-            ')' => self.add_token(RIGHT_PAREN),
-            '{' => self.add_token(LEFT_BRACE),
-            '}' => self.add_token(RIGHT_BRACE),
-            ',' => self.add_token(COMMA),
-            '.' => self.add_token(DOT),
-            '-' => self.add_token(MINUS),
-            '+' => self.add_token(PLUS),
-            ';' => self.add_token(SEMICOLON),
+            '(' => self.add_token(LeftParen),
+            ')' => self.add_token(RightParen),
+            '{' => self.add_token(LeftBrace),
+            '}' => self.add_token(RightBrace),
+            ',' => self.add_token(Comma),
+            '.' => self.add_token(Dot),
+            '-' => self.add_token(Minus),
+            '+' => self.add_token(Plus),
+            ';' => self.add_token(Semicolon),
             '*' => {
                 if self.match_character('/') {
                     return Err(format!(
@@ -93,34 +94,34 @@ impl Scanner {
                         self.line
                     ));
                 }
-                self.add_token(STAR)
+                self.add_token(Star)
             }
             '!' => {
                 if self.match_character('=') {
-                    self.add_token(BANG_EQUAL)
+                    self.add_token(BangEqual)
                 } else {
-                    self.add_token(BANG)
+                    self.add_token(Bang)
                 }
             }
             '=' => {
                 if self.match_character('=') {
-                    self.add_token(EQUAL_EQUAL)
+                    self.add_token(EqualEqual)
                 } else {
-                    self.add_token(EQUAL)
+                    self.add_token(Equal)
                 }
             }
             '<' => {
                 if self.match_character('=') {
-                    self.add_token(LESS_EQUAL)
+                    self.add_token(LessEqual)
                 } else {
-                    self.add_token(LESS)
+                    self.add_token(Less)
                 }
             }
             '>' => {
                 if self.match_character('=') {
-                    self.add_token(GREATER_EQUAL)
+                    self.add_token(GreaterEqual)
                 } else {
-                    self.add_token(GREATER)
+                    self.add_token(Greater)
                 }
             }
             '/' => {
@@ -150,7 +151,7 @@ impl Scanner {
                         }
                     }
                 } else {
-                    self.add_token(SLASH);
+                    self.add_token(Slash);
                 }
             }
             ' ' | '\r' | '\t' => {}
@@ -206,7 +207,7 @@ impl Scanner {
             .map(|byte| *byte as char)
             .collect::<String>();
 
-        self.add_token_lit(STRING, Some(StringValue(value)));
+        self.add_token_lit(String, Some(StringValue(value)));
 
         Ok(())
     }
@@ -234,12 +235,12 @@ impl Scanner {
 
         if is_fraction {
             match string_literal.parse::<f64>() {
-                Ok(value) => self.add_token_lit(NUMBER, Some(FValue(value))),
+                Ok(value) => self.add_token_lit(Number, Some(FValue(value))),
                 _ => return Err(format!("Failed to parse the float at line: {0}", self.line)),
             }
         } else {
             match string_literal.parse::<i64>() {
-                Ok(value) => self.add_token_lit(NUMBER, Some(IntValue(value))),
+                Ok(value) => self.add_token_lit(Number, Some(IntValue(value))),
                 _ => return Err(format!("Failed to parse the int at line: {0}", self.line)),
             }
         }
@@ -261,7 +262,7 @@ impl Scanner {
 
         let token_type = match token_type {
             Some(token_val) => token_val,
-            None => &IDENTIFIER,
+            None => &Identifier,
         };
 
         self.add_token(token_type.clone());
@@ -342,12 +343,12 @@ mod tests {
 
         let _ = scanner.scan_tokens();
 
-        assert_eq!(scanner.tokens.len(), 5); // due to EOF token
-        assert_eq!(scanner.tokens[0].token_type, LEFT_PAREN);
-        assert_eq!(scanner.tokens[1].token_type, LEFT_PAREN);
-        assert_eq!(scanner.tokens[2].token_type, RIGHT_PAREN);
-        assert_eq!(scanner.tokens[3].token_type, RIGHT_PAREN);
-        assert_eq!(scanner.tokens[4].token_type, EOF);
+        assert_eq!(scanner.tokens.len(), 5); // due to Eof token
+        assert_eq!(scanner.tokens[0].token_type, LeftParen);
+        assert_eq!(scanner.tokens[1].token_type, LeftParen);
+        assert_eq!(scanner.tokens[2].token_type, RightParen);
+        assert_eq!(scanner.tokens[3].token_type, RightParen);
+        assert_eq!(scanner.tokens[4].token_type, Eof);
     }
 
     #[test]
@@ -358,12 +359,12 @@ mod tests {
 
         let _ = scanner.scan_tokens();
 
-        assert_eq!(scanner.tokens.len(), 5); // due to EOF token
-        assert_eq!(scanner.tokens[0].token_type, BANG);
-        assert_eq!(scanner.tokens[1].token_type, BANG_EQUAL);
-        assert_eq!(scanner.tokens[2].token_type, EQUAL_EQUAL);
-        assert_eq!(scanner.tokens[3].token_type, GREATER_EQUAL);
-        assert_eq!(scanner.tokens[4].token_type, EOF);
+        assert_eq!(scanner.tokens.len(), 5); // due to Eof token
+        assert_eq!(scanner.tokens[0].token_type, Bang);
+        assert_eq!(scanner.tokens[1].token_type, BangEqual);
+        assert_eq!(scanner.tokens[2].token_type, EqualEqual);
+        assert_eq!(scanner.tokens[3].token_type, GreaterEqual);
+        assert_eq!(scanner.tokens[4].token_type, Eof);
     }
 
     #[test]
@@ -375,14 +376,14 @@ mod tests {
         let result = scanner.scan_tokens();
 
         assert!(result.is_ok());
-        assert_eq!(scanner.tokens.len(), 2); // due to EOF token
-        assert_eq!(scanner.tokens[0].token_type, STRING);
+        assert_eq!(scanner.tokens.len(), 2); // due to Eof token
+        assert_eq!(scanner.tokens[0].token_type, String);
         match scanner.tokens[0].literal.as_ref().unwrap() {
             StringValue(val) => assert_eq!(val, "ABC"),
             _ => panic!("Incorrect literal"),
         }
 
-        assert_eq!(scanner.tokens[1].token_type, EOF);
+        assert_eq!(scanner.tokens[1].token_type, Eof);
     }
 
     #[test]
@@ -409,7 +410,7 @@ mod tests {
         let result = scanner.scan_tokens();
 
         assert!(result.is_ok());
-        assert_eq!(scanner.tokens[0].token_type, NUMBER);
+        assert_eq!(scanner.tokens[0].token_type, Number);
         match scanner.tokens[0].literal.as_ref().unwrap() {
             IntValue(val) => assert_eq!(*val, 123),
             _ => panic!("Incorrect literal"),
@@ -426,13 +427,13 @@ mod tests {
 
         assert!(result.is_ok());
         assert_eq!(scanner.tokens.len(), 2);
-        assert_eq!(scanner.tokens[0].token_type, NUMBER);
+        assert_eq!(scanner.tokens[0].token_type, Number);
         match scanner.tokens[0].literal.as_ref().unwrap() {
             FValue(val) => assert_eq!(*val, 123.15),
             _ => panic!("Incorrect literal"),
         }
 
-        assert_eq!(scanner.tokens[1].token_type, EOF);
+        assert_eq!(scanner.tokens[1].token_type, Eof);
     }
 
     #[test]
@@ -445,13 +446,13 @@ mod tests {
 
         assert!(result.is_ok());
         assert_eq!(scanner.tokens.len(), 2);
-        assert_eq!(scanner.tokens[0].token_type, NUMBER);
+        assert_eq!(scanner.tokens[0].token_type, Number);
         match scanner.tokens[0].literal.as_ref().unwrap() {
             IntValue(val) => assert_eq!(*val, 123),
             _ => panic!("Incorrect literal"),
         }
 
-        assert_eq!(scanner.tokens[1].token_type, EOF);
+        assert_eq!(scanner.tokens[1].token_type, Eof);
     }
 
     #[test]
@@ -464,7 +465,7 @@ mod tests {
 
         assert!(result.is_ok());
         assert_eq!(scanner.tokens.len(), 1);
-        assert_eq!(scanner.tokens[0].token_type, EOF);
+        assert_eq!(scanner.tokens[0].token_type, Eof);
     }
 
     #[test]
@@ -481,7 +482,7 @@ mod tests {
             Some("Unterminated multiline comment at line 3\n".to_string())
         );
         assert_eq!(scanner.tokens.len(), 1);
-        assert_eq!(scanner.tokens[0].token_type, EOF);
+        assert_eq!(scanner.tokens[0].token_type, Eof);
     }
 
     #[test]
@@ -498,7 +499,7 @@ mod tests {
             Some("Extra multiline ending comment at line 1\n".to_string())
         );
         assert_eq!(scanner.tokens.len(), 1);
-        assert_eq!(scanner.tokens[0].token_type, EOF);
+        assert_eq!(scanner.tokens[0].token_type, Eof);
     }
 
     #[test]
@@ -511,9 +512,9 @@ mod tests {
 
         assert!(result.is_ok());
         assert_eq!(scanner.tokens.len(), 3);
-        assert_eq!(scanner.tokens[0].token_type, CLASS);
-        assert_eq!(scanner.tokens[1].token_type, VAR);
-        assert_eq!(scanner.tokens[2].token_type, EOF);
+        assert_eq!(scanner.tokens[0].token_type, Class);
+        assert_eq!(scanner.tokens[1].token_type, Var);
+        assert_eq!(scanner.tokens[2].token_type, Eof);
     }
 
     #[test]
@@ -526,9 +527,9 @@ mod tests {
 
         assert!(result.is_ok());
         assert_eq!(scanner.tokens.len(), 2);
-        assert_eq!(scanner.tokens[0].token_type, IDENTIFIER);
+        assert_eq!(scanner.tokens[0].token_type, Identifier);
         assert_eq!(scanner.tokens[0].lexeme, "bigvar");
-        assert_eq!(scanner.tokens[1].token_type, EOF);
+        assert_eq!(scanner.tokens[1].token_type, Eof);
     }
 
     #[test]
@@ -541,18 +542,18 @@ mod tests {
 
         assert_eq!(scanner.tokens.len(), 13);
 
-        assert_eq!(scanner.tokens[0].token_type, VAR);
-        assert_eq!(scanner.tokens[1].token_type, IDENTIFIER);
-        assert_eq!(scanner.tokens[2].token_type, EQUAL);
-        assert_eq!(scanner.tokens[3].token_type, NUMBER);
-        assert_eq!(scanner.tokens[4].token_type, SEMICOLON);
-        assert_eq!(scanner.tokens[5].token_type, WHILE);
-        assert_eq!(scanner.tokens[6].token_type, TRUE);
-        assert_eq!(scanner.tokens[7].token_type, LEFT_BRACE);
-        assert_eq!(scanner.tokens[8].token_type, PRINT);
-        assert_eq!(scanner.tokens[9].token_type, NUMBER);
-        assert_eq!(scanner.tokens[10].token_type, RIGHT_BRACE);
-        assert_eq!(scanner.tokens[11].token_type, SEMICOLON);
-        assert_eq!(scanner.tokens[12].token_type, EOF);
+        assert_eq!(scanner.tokens[0].token_type, Var);
+        assert_eq!(scanner.tokens[1].token_type, Identifier);
+        assert_eq!(scanner.tokens[2].token_type, Equal);
+        assert_eq!(scanner.tokens[3].token_type, Number);
+        assert_eq!(scanner.tokens[4].token_type, Semicolon);
+        assert_eq!(scanner.tokens[5].token_type, While);
+        assert_eq!(scanner.tokens[6].token_type, True);
+        assert_eq!(scanner.tokens[7].token_type, LeftBrace);
+        assert_eq!(scanner.tokens[8].token_type, Print);
+        assert_eq!(scanner.tokens[9].token_type, Number);
+        assert_eq!(scanner.tokens[10].token_type, RightBrace);
+        assert_eq!(scanner.tokens[11].token_type, Semicolon);
+        assert_eq!(scanner.tokens[12].token_type, Eof);
     }
 }
