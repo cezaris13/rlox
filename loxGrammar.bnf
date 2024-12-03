@@ -31,7 +31,8 @@
 <string> ::= "\"" (<letter> | <digit>)* "\""
 
 
-<expression> ::= <equality>
+<expression> ::= <assignment>
+<assignment> ::= <Identifier> "=" <assignment> | <equality>
 <equality> ::= <comparison> ( ("==" | "!=") <comparison>)*
 <comparison> ::= <term> ( (">" | "<" | ">=" | "<=") <term>)*
 <term> ::= <factor> ( ("-" | "+") <factor> )*

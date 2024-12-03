@@ -67,7 +67,7 @@ impl Parser {
             initializer = self.expression()?;
         }
 
-        self.consume(Semicolon, "Expect ';' after a variable declaration")?;
+        self.consume(Semicolon, "Expected ';' after a variable declaration")?;
 
         Ok(Statement::Variable {
             token: token_name,
@@ -84,7 +84,7 @@ impl Parser {
 
     fn print_statement(&mut self) -> Result<Statement, String> {
         let expression = self.expression()?;
-        self.consume(Semicolon, "Exprected ';' after the value.")?;
+        self.consume(Semicolon, "Expected ';' after the value.")?;
 
         Ok(Statement::Print {
             expression: expression,
@@ -101,7 +101,25 @@ impl Parser {
     }
 
     pub fn expression(self: &mut Self) -> Result<Expression, String> {
-        self.equality()
+        self.assignment()
+    }
+
+    pub fn assignment(&mut self) -> Result<Expression, String> {
+        let expression = self.equality()?;
+
+        if self.match_tokens(vec![Equal]) {
+            let equals = self.previous();
+            let value = self.assignment()?;
+
+            return match expression {
+                Variable { token } => Ok(Assign {
+                    name: token.lexeme,
+                    value: Box::new(value),
+                }),
+                _ => Err(format!("Invalid assignment target {}", equals.lexeme)),
+            };
+        }
+        Ok(expression)
     }
 
     fn equality(self: &mut Self) -> Result<Expression, String> {

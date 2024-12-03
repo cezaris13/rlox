@@ -1,3 +1,4 @@
+use crate::environment::Environment;
 use crate::expr::LiteralValue::*;
 use crate::token::Token;
 use crate::token::TokenType;
@@ -87,7 +88,7 @@ impl LiteralValue {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Expression {
     Binary {
         left: Box<Expression>,
@@ -106,6 +107,10 @@ pub enum Expression {
     },
     Variable {
         token: Token,
+    },
+    Assign {
+        name: String,
+        value: Box<Expression>,
     },
 }
 
@@ -131,7 +136,8 @@ impl Expression {
             Expression::Unary { operator, right } => {
                 format!("({} {})", operator.lexeme, right.to_string())
             }
-            Expression::Variable { token } => format!("variable {}", token.lexeme),
+            Expression::Variable { token } => format!("(defvar {} )", token.lexeme),
+            Expression::Assign { name, value } => format!("(= {} {})", name, value.to_string()),
         }
     }
 
@@ -141,12 +147,12 @@ impl Expression {
 
     // region evaluation
 
-    pub fn evaluate(&self) -> Result<LiteralValue, String> {
+    pub fn evaluate(&self, environment: &mut Environment) -> Result<LiteralValue, String> {
         return match self {
             Expression::Literal { value } => Ok(value.clone()),
-            Expression::Grouping { group } => group.evaluate(),
+            Expression::Grouping { group } => group.evaluate(environment),
             Expression::Unary { operator, right } => {
-                let right = (*right).evaluate()?;
+                let right = (*right).evaluate(environment)?;
 
                 match (&right, &operator.token_type) {
                     (IntValue(value), Minus) => Ok(IntValue(-value)),
@@ -169,8 +175,8 @@ impl Expression {
                 operator,
                 right,
             } => {
-                let left = (*left).evaluate()?;
-                let right = (*right).evaluate()?;
+                let left = (*left).evaluate(environment)?;
+                let right = (*right).evaluate(environment)?;
 
                 match &operator.token_type {
                     Plus => self.process_plus_operator(left, right),
@@ -187,8 +193,12 @@ impl Expression {
                 }
             }
 
-            Expression::Variable { token } => {
-                todo!()
+            Expression::Variable { token } => environment.get(token),
+
+            Expression::Assign { name, value } => {
+                let value = value.evaluate(environment)?;
+                environment.assign(name, &value)?;
+                Ok(value)
             }
         };
     }
