@@ -60,15 +60,7 @@ fn run(interpreter: &mut Interpreter, source: &str) -> Result<(), String> {
     let mut parser = Parser::new(tokens);
     let statements = parser.parse()?;
 
-    for statement in statements {
-        match statement {
-            stmt::Statement::Expression { expression } => {
-                let result = interpreter.interpret(expression)?;
-                println!("{}", result.to_string());
-            }
-            _ => (), // stmt::Statement::Print { expression } => {}
-        }
-    }
+    interpreter.interpret_statements(statements)?;
 
     Ok(())
 }
