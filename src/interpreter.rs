@@ -25,6 +25,9 @@ impl Interpreter {
                     let result = expression.evaluate()?;
                     println!("{}", result.to_string());
                 }
+                Statement::Variable { token, initializer } => {
+                    println!("token: {:?}, initializer: {:?}", token, initializer);
+                }
             };
         }
 

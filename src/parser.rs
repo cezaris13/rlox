@@ -28,17 +28,51 @@ impl Parser {
         let mut errors = vec![];
 
         while !self.is_at_end() {
-            match self.statement() {
+            match self.declaration() {
                 Ok(statement) => statements.push(statement),
                 Err(message) => errors.push(message),
             }
         }
 
         if errors.len() != 0 {
+            // question, shoulf we just print it here and return the remaining ones?
             return Err(errors.join("\n"));
         }
 
         Ok(statements)
+    }
+
+    fn declaration(&mut self) -> Result<Statement, String> {
+        if self.match_tokens(vec![Var]) {
+            return match self.variable_declaration() {
+                Ok(statement) => Ok(statement),
+                Err(message) => {
+                    self.synchronize();
+                    Err(message)
+                }
+            };
+        }
+
+        self.statement()
+    }
+
+    fn variable_declaration(&mut self) -> Result<Statement, String> {
+        let token_name = self.consume(Identifier, "Expect variable name")?;
+
+        let mut initializer: Expression = Literal {
+            value: LiteralValue::Nil,
+        };
+
+        if self.match_tokens(vec![Equal]) {
+            initializer = self.expression()?;
+        }
+
+        self.consume(Semicolon, "Expect ';' after a variable declaration")?;
+
+        Ok(Statement::Variable {
+            token: token_name,
+            initializer: initializer,
+        })
     }
 
     fn statement(&mut self) -> Result<Statement, String> {
@@ -173,6 +207,12 @@ impl Parser {
             });
         }
 
+        if self.match_tokens(vec![Identifier]) {
+            return Ok(Variable {
+                token: self.previous(),
+            });
+        }
+
         if self.match_tokens(vec![LeftParen]) {
             let expression = self.expression()?;
 
@@ -255,7 +295,7 @@ impl Parser {
         self.previous()
     }
 
-    fn consume(self: &mut Self, token_type: TokenType, message: &str) -> Result<(), String> {
+    fn consume(self: &mut Self, token_type: TokenType, message: &str) -> Result<Token, String> {
         let token = self.peek();
 
         if token.token_type != token_type {
@@ -263,7 +303,7 @@ impl Parser {
         }
 
         self.advance();
-        Ok(())
+        Ok(token)
     }
 
     // endregion

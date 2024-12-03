@@ -104,6 +104,9 @@ pub enum Expression {
     Literal {
         value: LiteralValue,
     },
+    Variable {
+        token: Token,
+    },
 }
 
 impl Expression {
@@ -128,6 +131,7 @@ impl Expression {
             Expression::Unary { operator, right } => {
                 format!("({} {})", operator.lexeme, right.to_string())
             }
+            Expression::Variable { token } => format!("variable {}", token.lexeme),
         }
     }
 
@@ -181,6 +185,10 @@ impl Expression {
                     EqualEqual => Ok(self.bool_to_literal_value_bool(left == right)),
                     _ => self.not_implemented_error(&operator.token_type, &left, &right),
                 }
+            }
+
+            Expression::Variable { token } => {
+                todo!()
             }
         };
     }
