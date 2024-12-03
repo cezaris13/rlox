@@ -40,6 +40,11 @@ impl Interpreter {
 
                     self.environment.define(&token.lexeme, &value);
                 }
+                Statement::Block { statements } => {
+                    for statement in statements {
+                        println!("{:?}", statement);
+                    }
+                }
             };
         }
 

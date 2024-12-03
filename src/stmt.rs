@@ -13,4 +13,8 @@ pub enum Statement {
         token: Token,
         initializer: expr::Expression,
     },
+
+    Block {
+        statements: Vec<Statement>,
+    },
 }

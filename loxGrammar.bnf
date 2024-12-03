@@ -1,16 +1,26 @@
-<expression> ::= <literal> | <unary> | <grouping> | <binary>
+<expression> ::= <literal>
+               | <unary>
+               | <grouping>
+               | <binary>
 
 <digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
 <integer> ::= <digit>+
-<number> ::= <integer> "." <digit>+ | <integer>
+<number> ::= <integer> "." <digit>+
+           | <integer>
 
-
-<letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
-          | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+<letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
+           | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+           | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
+           | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 
 <string> ::= (<letter> | <digit>)*
-<literal> ::= <number> | <string> | "true" | "false" | "nil"
+<literal> ::= <number>
+            | <string>
+            | "true"
+            | "false"
+            | "nil"
+
 <grouping> ::= "(" <expression> ")"
 <unary> ::= ("-" | "!") <expression>
 <binary> ::= <expression> <operator> <expression>
@@ -22,23 +32,37 @@
 <digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
 <integer> ::= <digit>+
-<number> ::= <integer> "." <digit>+ | <integer>
+<number> ::= <integer> "." <digit>+
+           | <integer>
 
 
-<letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
-          | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+<letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
+           | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+           | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
+           | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 
 <string> ::= "\"" (<letter> | <digit>)* "\""
 
-
 <expression> ::= <assignment>
-<assignment> ::= <Identifier> "=" <assignment> | <equality>
+<assignment> ::= <identifier> "=" <assignment>
+               | <equality>
+
 <equality> ::= <comparison> ( ("==" | "!=") <comparison>)*
 <comparison> ::= <term> ( (">" | "<" | ">=" | "<=") <term>)*
 <term> ::= <factor> ( ("-" | "+") <factor> )*
 <factor> ::= <unary> ( ("/" | "*") <unary> )*
-<unary> ::= ("-" | "!") <unary> | <primary>
-<primary> ::= <number> | <string> | "true" | "false" | "nil" | "(" <expression> ")" | <identifier>
+
+<unary> ::= ("-" | "!") <unary>
+          | <primary>
+
+<primary> ::= <number>
+            | <string>
+            | "true"
+            | "false"
+            | "nil"
+            | "(" <expression> ")"
+            | <identifier>
+
 <identifier> ::= (<letter> | <digit>)*
 
 ;; update with statements, print and var
@@ -47,11 +71,15 @@
 
 <program> ::= <declaration>* <eof>
 
-<declaration> ::= <variableDeclaration> | <statement>
+<declaration> ::= <variableDeclaration>
+                | <statement>
 
 <variableDeclaration> ::= "var " <identifier> ("=" <expression>) ";"
 
-<statement> ::= <printStatement> | <expressionStatement>
+<statement> ::= <printStatement>
+              | <expressionStatement>
+              | <block>
 
 <expressionStatement> ::= <expression> ";"
 <printStatement> ::= "print " <expression> ";"
+<block> ::= "{" <declaration> "}"

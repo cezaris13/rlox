@@ -76,10 +76,27 @@ impl Parser {
     }
 
     fn statement(&mut self) -> Result<Statement, String> {
+        if self.match_tokens(vec![LeftBrace]) {
+            let blocks = self.blocks()?;
+            return Ok(Statement::Block { statements: blocks });
+        }
         if self.match_tokens(vec![Print]) {
             return self.print_statement();
         }
         return self.expression_statement();
+    }
+
+    fn blocks(&mut self) -> Result<Vec<Statement>, String> {
+        let mut statements = vec![];
+
+        while !self.check(RightBrace) && !self.is_at_end() {
+            let declaration = self.declaration()?;
+            statements.push(declaration);
+        }
+
+        self.consume(RightBrace, "Expect '}' after block")?;
+
+        Ok(statements)
     }
 
     fn print_statement(&mut self) -> Result<Statement, String> {
