@@ -2,6 +2,7 @@ mod expr;
 mod interpreter;
 mod parser;
 mod scanner;
+mod stmt;
 mod token;
 
 use crate::interpreter::Interpreter;
@@ -57,11 +58,17 @@ fn run(interpreter: &mut Interpreter, source: &str) -> Result<(), String> {
     let tokens = scanner.scan_tokens()?;
 
     let mut parser = Parser::new(tokens);
-    let expression = parser.parse()?;
+    let statements = parser.parse()?;
 
-    let result = interpreter.interpret(expression)?;
-
-    println!("{}", result.to_string());
+    for statement in statements {
+        match statement {
+            stmt::Statement::Expression { expression } => {
+                let result = interpreter.interpret(expression)?;
+                println!("{}", result.to_string());
+            }
+            _ => (), // stmt::Statement::Print { expression } => {}
+        }
+    }
 
     Ok(())
 }

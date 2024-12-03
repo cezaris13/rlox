@@ -38,3 +38,13 @@
 <factor> ::= <unary> ( ("/" | "*") <unary> )*
 <unary> ::= ("-" | "!") <unary> | <primary>
 <primary> ::= <number> | <string> | "true" | "false" | "nil" | "(" <expression> ")"
+
+;; update with statements and print
+<eof> ::= "\0"
+
+<program> ::= <statement>* <eof>
+
+<statement> ::= <printStatement> | <expressionStatement>
+
+<expressionStatement> ::= <expression> ";"
+<printStatement> ::= "print" <expression> ";"

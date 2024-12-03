@@ -87,6 +87,7 @@ impl LiteralValue {
     }
 }
 
+#[derive(Debug)]
 pub enum Expression {
     Binary {
         left: Box<Expression>,
@@ -380,7 +381,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -396,7 +397,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -412,7 +413,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -426,7 +427,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -440,7 +441,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -454,7 +455,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -471,7 +472,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -485,7 +486,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -499,7 +500,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
@@ -513,7 +514,7 @@ mod tests {
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
-        let expression = parser.parse();
+        let expression = parser.expression();
 
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate();
