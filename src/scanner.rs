@@ -5,8 +5,8 @@ use crate::token::{LiteralValue, Token, TokenType};
 use std::collections::HashMap;
 use std::string::String;
 
-pub struct Scanner {
-    source: String,
+pub struct Scanner<'a> {
+    source: &'a str,
     tokens: Vec<Token>,
     start: usize,
     current: usize,
@@ -14,8 +14,8 @@ pub struct Scanner {
     keywords: HashMap<String, TokenType>,
 }
 
-impl Scanner {
-    pub fn new(source: &str) -> Self {
+impl<'a> Scanner<'a> {
+    pub fn new(source: &'a str) -> Self {
         let mut keywords: HashMap<String, TokenType> = HashMap::new();
 
         keywords.insert("and".to_string(), And);
@@ -36,7 +36,7 @@ impl Scanner {
         keywords.insert("while".to_string(), While);
 
         Self {
-            source: source.to_string(),
+            source: source,
             tokens: vec![],
             start: 0,
             current: 0,
