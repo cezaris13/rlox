@@ -69,7 +69,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() > 2 {
-        println!("Usage OListp [script]");
+        println!("Usage OLisp [script]");
         exit(64);
     } else if args.len() == 2 {
         match run_file(&args[1]) {

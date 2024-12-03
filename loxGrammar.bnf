@@ -28,7 +28,7 @@
 <letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
           | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 
-<string> ::= (<letter> | <digit>)*
+<string> ::= "\"" (<letter> | <digit>)* "\""
 
 
 <expression> ::= <equality>
@@ -37,14 +37,20 @@
 <term> ::= <factor> ( ("-" | "+") <factor> )*
 <factor> ::= <unary> ( ("/" | "*") <unary> )*
 <unary> ::= ("-" | "!") <unary> | <primary>
-<primary> ::= <number> | <string> | "true" | "false" | "nil" | "(" <expression> ")"
+<primary> ::= <number> | <string> | "true" | "false" | "nil" | "(" <expression> ")" | <identifier>
+<identifier> ::= (<letter> | <digit>)*
 
-;; update with statements and print
-<eof> ::= "\0"
+;; update with statements, print and var
+;; in bnf checker this makes the checker fail, so \0 here is denoted as 0
+<eof> ::= "0"
 
-<program> ::= <statement>* <eof>
+<program> ::= <declaration>* <eof>
+
+<declaration> ::= <variableDeclaration> | <statement>
+
+<variableDeclaration> ::= "var " <identifier> ("=" <expression>) ";"
 
 <statement> ::= <printStatement> | <expressionStatement>
 
 <expressionStatement> ::= <expression> ";"
-<printStatement> ::= "print" <expression> ";"
+<printStatement> ::= "print " <expression> ";"
