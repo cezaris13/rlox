@@ -193,11 +193,11 @@ impl Expression {
                 }
             }
 
-            Expression::Variable { token } => environment.get(token),
+            Expression::Variable { token } => environment.get(&token.lexeme),
 
             Expression::Assign { name, value } => {
                 let value = value.evaluate(environment)?;
-                environment.assign(name, &value)?;
+                environment.assign(name.clone(), value.clone())?; // temp fix
                 Ok(value)
             }
         };
