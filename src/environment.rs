@@ -44,7 +44,7 @@ impl Environment {
         match self.values.get_key_value(name) {
             Some((_, value)) => Ok(value.clone()),
             None => match &self.enclosing {
-                Some(enclosing_environent) => enclosing_environent.get(name),
+                Some(enclosing_environment) => enclosing_environment.get(name),
                 _ => Err(format!("Undefined variable {}", name)),
             },
         }

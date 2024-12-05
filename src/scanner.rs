@@ -248,10 +248,7 @@ impl<'a> Scanner<'a> {
 
         let token_type = self.keywords.get(string_literal);
 
-        let token_type = match token_type {
-            Some(token_val) => token_val,
-            None => &Identifier,
-        };
+        let token_type = token_type.unwrap_or_else(|| &Identifier);
 
         self.add_token(token_type.clone());
     }

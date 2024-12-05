@@ -37,7 +37,7 @@ impl Parser {
         }
 
         if errors.len() != 0 {
-            // question, shoulf we just print it here and return the remaining ones?
+            // question, should we just print it here and return the remaining ones?
             return Err(errors.join("\n"));
         }
 
@@ -87,7 +87,7 @@ impl Parser {
             return self.print_statement();
         }
 
-        return self.expression_statement();
+        self.expression_statement()
     }
 
     fn blocks(&mut self) -> Result<Vec<Statement>, String> {
@@ -107,18 +107,14 @@ impl Parser {
         let expression = self.expression()?;
         self.consume(Semicolon, "Expected ';' after the value.")?;
 
-        Ok(Statement::Print {
-            expression: expression,
-        })
+        Ok(Statement::Print { expression })
     }
 
     fn expression_statement(&mut self) -> Result<Statement, String> {
         let expression = self.expression()?;
         self.consume(Semicolon, "Exprected ';' after the value.")?;
 
-        Ok(Statement::Expression {
-            expression: expression,
-        })
+        Ok(Statement::Expression { expression })
     }
 
     pub fn expression(self: &mut Self) -> Result<Expression, String> {

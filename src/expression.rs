@@ -144,7 +144,7 @@ impl Expression {
     // region evaluation
 
     pub fn evaluate(&self, environment: &mut Environment) -> Result<LiteralValue, String> {
-        return match self {
+        match self {
             Expression::Literal { value } => Ok(value.clone()),
             Expression::Grouping { group } => group.evaluate(environment),
             Expression::Unary { operator, right } => {
@@ -196,7 +196,7 @@ impl Expression {
                 environment.assign(name.clone(), value.clone())?; // temp fix
                 Ok(value)
             }
-        };
+        }
     }
 
     fn process_plus_operator(
@@ -338,12 +338,12 @@ impl Expression {
         left: &LiteralValue,
         right: &LiteralValue,
     ) -> Result<LiteralValue, String> {
-        return Err(format!(
+        Err(format!(
             "{:?} operation is not implemented for: {:?} and {:?}",
             token_type,
             left.to_string(),
             right.to_string()
-        ));
+        ))
     }
 
     // endregion

@@ -21,13 +21,13 @@ impl Interpreter {
                 Statement::Expression { expression } => {
                     let _ = expression.evaluate(
                         Rc::get_mut(&mut self.environment)
-                            .expect("Could not get mutable referencve to environment"),
+                            .expect("Could not get mutable reference to environment"),
                     )?;
                 }
                 Statement::Print { expression } => {
                     let result = expression.evaluate(
                         Rc::get_mut(&mut self.environment)
-                            .expect("Could not get mutable referencve to environment"),
+                            .expect("Could not get mutable reference to environment"),
                     )?;
                     println!("{}", result.to_string());
                 }
@@ -39,13 +39,13 @@ impl Interpreter {
                     let value = if initializer != nil {
                         initializer.evaluate(
                             Rc::get_mut(&mut self.environment)
-                                .expect("Could not get mutable referencve to environment"),
+                                .expect("Could not get mutable reference to environment"),
                         )?
                     } else {
                         LiteralValue::Nil
                     };
                     Rc::get_mut(&mut self.environment)
-                        .expect("Could not get mutable referencve to environment")
+                        .expect("Could not get mutable reference to environment")
                         .define(token.lexeme, value);
                 }
                 Statement::Block { statements } => {

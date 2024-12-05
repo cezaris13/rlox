@@ -18,8 +18,8 @@ use std::process::exit;
 fn run_file(path: &str) -> Result<(), String> {
     let mut interpreter: Interpreter = Interpreter::new();
     match fs::read_to_string(path) {
-        Err(message) => return Err(message.to_string()),
-        Ok(contents) => return run(&mut interpreter, &contents),
+        Err(message) => Err(message.to_string()),
+        Ok(contents) => run(&mut interpreter, &contents),
     }
 }
 
