@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "./tests/token_tests.rs"]
+mod tests;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum TokenType {
     // Single-character tokens.

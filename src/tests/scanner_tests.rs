@@ -21,19 +21,23 @@ mod tests {
     }
 
     #[test]
-    fn handler_two_char_tokens() {
-        let source = "! != == >=";
+    fn handler_simple_tokens() {
+        let source = "! != == >= <= < > ,";
 
         let mut scanner = Scanner::new(source);
 
         let _ = scanner.scan_tokens();
 
-        assert_eq!(scanner.tokens.len(), 5); // due to Eof token
+        assert_eq!(scanner.tokens.len(), 9); // due to Eof token
         assert_eq!(scanner.tokens[0].token_type, Bang);
         assert_eq!(scanner.tokens[1].token_type, BangEqual);
         assert_eq!(scanner.tokens[2].token_type, EqualEqual);
         assert_eq!(scanner.tokens[3].token_type, GreaterEqual);
-        assert_eq!(scanner.tokens[4].token_type, Eof);
+        assert_eq!(scanner.tokens[4].token_type, LessEqual);
+        assert_eq!(scanner.tokens[5].token_type, Less);
+        assert_eq!(scanner.tokens[6].token_type, Greater);
+        assert_eq!(scanner.tokens[7].token_type, Comma);
+        assert_eq!(scanner.tokens[8].token_type, Eof);
     }
 
     #[test]
@@ -224,5 +228,61 @@ mod tests {
         assert_eq!(scanner.tokens[10].token_type, RightBrace);
         assert_eq!(scanner.tokens[11].token_type, Semicolon);
         assert_eq!(scanner.tokens[12].token_type, Eof);
+    }
+
+    #[test]
+    fn scan_tokens_unexpected_character_returns_error() {
+        let source = "&";
+        let mut scanner = Scanner::new(source);
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_err());
+
+        assert_eq!(
+            result.err(),
+            Some("Unexpected character & at line 1".to_string())
+        );
+    }
+
+    #[test]
+    fn scan_tokens_double_star_returns_as_expected() {
+        let source = "**";
+        let mut scanner = Scanner::new(source);
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+
+        assert_eq!(scanner.tokens.len(), 3);
+
+        assert_eq!(scanner.tokens[0].token_type, Star);
+        assert_eq!(scanner.tokens[1].token_type, Star);
+        assert_eq!(scanner.tokens[2].token_type, Eof);
+    }
+
+    #[test]
+    fn scan_one_line_comments_updates_line_number() {
+        let source = "// comment \n // comment";
+        let mut scanner = Scanner::new(source);
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+
+        assert_eq!(scanner.tokens.len(), 1);
+
+        assert_eq!(scanner.tokens[0].token_type, Eof);
+    }
+
+    #[test]
+    fn scan_multi_line_string_returns_string() {
+        let source = "\"hello\nworld\"";
+        let mut scanner = Scanner::new(source);
+        let result = scanner.scan_tokens();
+
+        assert!(result.is_ok());
+
+        assert_eq!(scanner.tokens.len(), 2);
+
+        assert_eq!(scanner.tokens[0].token_type, String);
+        assert_eq!(scanner.tokens[1].token_type, Eof);
     }
 }
