@@ -16,10 +16,10 @@ pub struct Environment {
 
 impl Environment {
     pub fn new() -> Self {
-        return Environment {
+        Environment {
             values: HashMap::new(),
             enclosing: None,
-        };
+        }
     }
 
     pub fn define(&mut self, name: String, value: LiteralValue) {
@@ -30,7 +30,7 @@ impl Environment {
         match self.values.get_key_value(&name) {
             Some(_) => {
                 self.define(name, value);
-                return Ok(());
+                Ok(())
             }
 
             None => match &self.enclosing {

@@ -191,7 +191,7 @@ mod tests {
     }
 
     #[test]
-    fn handler_keywords_unindentified_token_returns_identifier_token() {
+    fn handler_keywords_unidentified_token_returns_identifier_token() {
         let source = "bigvar";
 
         let mut scanner = Scanner::new(source);

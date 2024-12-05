@@ -258,7 +258,7 @@ impl<'a> Scanner<'a> {
     // region character manipulation
 
     fn is_at_end(&self) -> bool {
-        self.current >= self.source.len() as usize
+        self.current >= self.source.len()
     }
 
     fn advance(self: &mut Self) -> char {

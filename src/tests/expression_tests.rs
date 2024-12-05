@@ -47,17 +47,7 @@ mod tests {
             Ok(LiteralValue::False),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -73,17 +63,7 @@ mod tests {
             Err(String::from("Minus not implemented for Bool")),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -191,17 +171,7 @@ mod tests {
             )),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -220,17 +190,7 @@ mod tests {
             )),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -249,17 +209,7 @@ mod tests {
             )),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -288,17 +238,7 @@ mod tests {
             Err(String::from("Division by 0")),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -325,17 +265,7 @@ mod tests {
             )),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -362,17 +292,7 @@ mod tests {
             )),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -399,17 +319,7 @@ mod tests {
             )),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -436,17 +346,7 @@ mod tests {
             )),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -461,17 +361,7 @@ mod tests {
             Ok(LiteralValue::True),
         ];
 
-        let evaluated_expressions = sources
-            .iter()
-            .map(|source| {
-                let mut scanner: Scanner = Scanner::new(source);
-                let tokens = scanner.scan_tokens().unwrap();
-                let mut parser = Parser::new(tokens);
-                let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
-            })
-            .collect::<Vec<Result<LiteralValue, String>>>();
+        let evaluated_expressions = evaluate_list_of_sources(&sources);
 
         assert_eq!(evaluated_expressions, responses);
     }
@@ -521,5 +411,19 @@ mod tests {
             .collect::<Vec<LiteralValue>>();
 
         assert_eq!(evaluated_expressions, responses);
+    }
+
+    fn evaluate_list_of_sources(sources: &Vec<&str>) -> Vec<Result<LiteralValue, String>> {
+        sources
+            .iter()
+            .map(|source| {
+                let mut scanner: Scanner = Scanner::new(source);
+                let tokens = scanner.scan_tokens().unwrap();
+                let mut parser = Parser::new(tokens);
+                let expression = parser.expression().unwrap();
+                let mut environment = Environment::new();
+                expression.evaluate(&mut environment)
+            })
+            .collect::<Vec<Result<LiteralValue, String>>>()
     }
 }

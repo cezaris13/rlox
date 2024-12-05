@@ -60,7 +60,7 @@ impl LiteralValue {
             TokenType::False => Self::False,
             TokenType::True => Self::True,
             TokenType::Nil => Self::Nil,
-            _ => panic!("Could not create literal calue from {:?}", token),
+            _ => panic!("Could not create literal value from {:?}", token),
         }
     }
 
@@ -149,12 +149,10 @@ impl Expression {
                 match (&right, &operator.token_type) {
                     (IntValue(value), Minus) => Ok(IntValue(-value)),
                     (FValue(value), Minus) => Ok(FValue(-value)),
-                    (_, Minus) => {
-                        return Err(format!("Minus not implemented for {}", right.to_type()))
-                    }
+                    (_, Minus) => Err(format!("Minus not implemented for {}", right.to_type())),
                     (any, Bang) => Ok(any.is_falsy()),
                     _ => {
-                        return Err(format!(
+                        Err(format!(
                             "Non unary operator {:?} is not implemented for {}",
                             operator.token_type,
                             right.to_type(),

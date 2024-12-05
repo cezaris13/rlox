@@ -1,7 +1,9 @@
 #[cfg(test)]
 mod tests {
+    use crate::expression::Expression::*;
     use crate::parser::Parser;
     use crate::scanner::Scanner;
+    use crate::statement::Statement::{Block, Expression, Variable};
     use crate::token::TokenType::*;
     use crate::token::{LiteralValue, Token};
 
@@ -72,5 +74,113 @@ mod tests {
         let string_expression = expression.unwrap().to_string();
 
         assert_eq!(string_expression, "(+ (/ 12 2) 3)");
+    }
+
+    #[test]
+    fn test_variable_declaration_operators() {
+        let source = "var some_id;";
+        let mut scanner: Scanner = Scanner::new(source);
+
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+
+        let expression = parser.parse();
+        let response = Variable {
+            token: Token {
+                token_type: Identifier,
+                lexeme: std::string::String::from("some_id"),
+                literal: None,
+                line: 1,
+            },
+            initializer: Literal {
+                value: crate::expression::LiteralValue::Nil,
+            },
+        };
+
+        assert!(expression.is_ok());
+
+        let string_expression = expression.unwrap();
+        assert_eq!(string_expression.len(), 1);
+        assert_eq!(string_expression[0], response);
+    }
+
+    #[test]
+    fn test_variable_assignment_operators() {
+        let source = "some_id = 2;";
+        let mut scanner: Scanner = Scanner::new(source);
+
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+
+        let expression = parser.parse();
+        let response = Expression {
+            expression: Assign {
+                name: std::string::String::from("some_id"),
+                value: Box::new(Literal {
+                    value: crate::expression::LiteralValue::IntValue(2),
+                }),
+            },
+        };
+
+        assert!(expression.is_ok());
+
+        let string_expression = expression.unwrap();
+        assert_eq!(string_expression.len(), 1);
+        assert_eq!(string_expression[0], response);
+    }
+
+    #[test]
+    fn test_print_operator() {
+        let source = "print \"hello\";";
+        let mut scanner: Scanner = Scanner::new(source);
+
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+
+        let expression = parser.parse();
+        let response = crate::statement::Statement::Print {
+            expression: Literal {
+                value: crate::expression::LiteralValue::StringValue(std::string::String::from(
+                    "hello",
+                )),
+            },
+        };
+
+        assert!(expression.is_ok());
+
+        let string_expression = expression.unwrap();
+        assert_eq!(string_expression.len(), 1);
+        assert_eq!(string_expression[0], response);
+    }
+
+    #[test]
+    fn test_blocks() {
+        let source = "{a=1;}";
+        let mut scanner: Scanner = Scanner::new(source);
+
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+
+        let expression = parser.parse();
+        let response = Block {
+            statements: vec![Expression {
+                expression: Assign {
+                    name: std::string::String::from("a"),
+                    value: Box::new(Literal {
+                        value: crate::expression::LiteralValue::IntValue(1),
+                    }),
+                },
+            }],
+        };
+
+        assert!(expression.is_ok());
+
+        let string_expression = expression.unwrap();
+        assert_eq!(string_expression.len(), 1);
+        assert_eq!(string_expression[0], response);
     }
 }
