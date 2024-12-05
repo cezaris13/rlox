@@ -42,20 +42,20 @@ mod tests {
         assert_eq!(variable.unwrap(), True);
     }
 
-    // #[test]
-    // fn assign_value_from_enclosing() {
-    //     let mut environment = Environment::new();
-    //     let mut environment_enclosing = Environment::new();
-    //     environment_enclosing.define(String::from("test"), True);
+    #[test]
+    fn assign_value_from_enclosing() {
+        let mut environment = Environment::new();
+        let mut environment_enclosing = Environment::new();
+        environment_enclosing.define(String::from("test"), True);
 
-    //     environment.enclosing = Some(Rc::new(environment_enclosing));
+        environment.enclosing = Some(Rc::new(environment_enclosing));
 
-    //     let result = environment.assign(String::from("test"), False);
+        let result = environment.assign(String::from("test"), False);
 
-    //     assert!(result.is_ok());
+        assert!(result.is_ok());
 
-    //     assert_eq!(environment.get("test"), Ok(True));
-    // }
+        assert_eq!(environment.get("test"), Ok(True));
+    }
 
     #[test]
     fn assign_value_does_not_exist_returns_error() {

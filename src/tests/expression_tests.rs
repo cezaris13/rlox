@@ -6,6 +6,7 @@ mod tests {
     use crate::expression::LiteralValue;
     use crate::expression::LiteralValue::*;
     use crate::token::Token;
+    use crate::token::TokenType;
     use crate::token::TokenType::*;
     use crate::Parser;
     use crate::Scanner;
@@ -34,43 +35,63 @@ mod tests {
     }
 
     #[test]
-    fn evaluate_bang_bang() {
-        let mut environment = Environment::new();
-        let source = "!!true";
-        let mut scanner: Scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens().unwrap();
-        let mut parser = Parser::new(tokens);
-        let expression = parser.expression();
+    fn test_bang_operator() {
+        let sources = vec!["!0", "!0.0", "!\"hello\"", "!nil", "!!true", "!true"];
 
-        assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
+        let responses: Vec<Result<LiteralValue, String>> = vec![
+            Ok(LiteralValue::True),
+            Ok(LiteralValue::True),
+            Ok(LiteralValue::False),
+            Ok(LiteralValue::True),
+            Ok(LiteralValue::True),
+            Ok(LiteralValue::False),
+        ];
 
-        assert!(evaluation.is_ok());
+        let evaluated_expressions = sources
+            .iter()
+            .map(|source| {
+                let mut scanner: Scanner = Scanner::new(source);
+                let tokens = scanner.scan_tokens().unwrap();
+                let mut parser = Parser::new(tokens);
+                let expression = parser.expression().unwrap();
+                let mut environment = Environment::new();
+                expression.evaluate(&mut environment)
+            })
+            .collect::<Vec<Result<LiteralValue, String>>>();
 
-        assert_eq!(evaluation.unwrap(), LiteralValue::True);
+        assert_eq!(evaluated_expressions, responses);
     }
 
     #[test]
-    fn evaluate_bang() {
-        let mut environment = Environment::new();
-        let source = "!true";
-        let mut scanner: Scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens().unwrap();
-        let mut parser = Parser::new(tokens);
-        let expression = parser.expression();
+    fn test_minus_unary_operator() {
+        let sources = vec!["-1", "-1.0", "--12", "-true"];
 
-        assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
+        let responses: Vec<Result<LiteralValue, String>> = vec![
+            Ok(IntValue(-1)),
+            Ok(FValue(-1.0)),
+            Ok(IntValue(12)),
+            Err(String::from("Minus not implemented for Bool")),
+        ];
 
-        assert!(evaluation.is_ok());
+        let evaluated_expressions = sources
+            .iter()
+            .map(|source| {
+                let mut scanner: Scanner = Scanner::new(source);
+                let tokens = scanner.scan_tokens().unwrap();
+                let mut parser = Parser::new(tokens);
+                let expression = parser.expression().unwrap();
+                let mut environment = Environment::new();
+                expression.evaluate(&mut environment)
+            })
+            .collect::<Vec<Result<LiteralValue, String>>>();
 
-        assert_eq!(evaluation.unwrap(), LiteralValue::False);
+        assert_eq!(evaluated_expressions, responses);
     }
 
     #[test]
-    fn evaluate_minus_int() {
+    fn evaluate_group() {
         let mut environment = Environment::new();
-        let source = "-12";
+        let source = "( 1 + 2 )";
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
@@ -79,22 +100,7 @@ mod tests {
         assert!(expression.is_ok());
         let evaluation = expression.unwrap().evaluate(&mut environment);
 
-        assert_eq!(evaluation.unwrap(), IntValue(-12));
-    }
-
-    #[test]
-    fn evaluate_minus_double() {
-        let mut environment = Environment::new();
-        let source = "-12.0";
-        let mut scanner: Scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens().unwrap();
-        let mut parser = Parser::new(tokens);
-        let expression = parser.expression();
-
-        assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
-
-        assert_eq!(evaluation.unwrap(), FValue(-12.0));
+        assert_eq!(evaluation.unwrap(), IntValue(3));
     }
 
     #[test]
@@ -154,26 +160,6 @@ mod tests {
 
         assert_eq!(result, responses);
     }
-
-    // #[test]
-    // fn evaluate_wrong_unary_operator_return_error() {
-    //     let mut environment = Environment::new();
-    //     let source = "( = 12)";
-    //     let mut scanner: Scanner = Scanner::new(source);
-    //     let tokens = scanner.scan_tokens().unwrap();
-    //     let mut parser = Parser::new(tokens);
-    //     let expression = parser.expression();
-
-    //     assert!(expression.is_err());
-
-    //     assert_eq!(
-    //         expression.err(),
-    //         Some(String::from(
-    //             "Non unary operator {:?} is not implemented for {}"
-    //         ))
-    //     );
-    // }
-    //
 
     #[test]
     fn test_plus_operator() {
@@ -459,6 +445,78 @@ mod tests {
                 expression.evaluate(&mut environment)
             })
             .collect::<Vec<Result<LiteralValue, String>>>();
+
+        assert_eq!(evaluated_expressions, responses);
+    }
+
+    #[test]
+    fn test_equal_operator() {
+        let sources = vec!["5==5", "5!=5.5", "\"a\" ==\"a\""];
+
+        let responses: Vec<Result<LiteralValue, String>> = vec![
+            Ok(LiteralValue::True),
+            Ok(LiteralValue::True),
+            Ok(LiteralValue::True),
+        ];
+
+        let evaluated_expressions = sources
+            .iter()
+            .map(|source| {
+                let mut scanner: Scanner = Scanner::new(source);
+                let tokens = scanner.scan_tokens().unwrap();
+                let mut parser = Parser::new(tokens);
+                let expression = parser.expression().unwrap();
+                let mut environment = Environment::new();
+                expression.evaluate(&mut environment)
+            })
+            .collect::<Vec<Result<LiteralValue, String>>>();
+
+        assert_eq!(evaluated_expressions, responses);
+    }
+
+    #[test]
+    fn test_from_token() {
+        let tokens = vec![
+            Token::new(TokenType::False, "".to_string(), None, 0),
+            Token::new(TokenType::True, "".to_string(), None, 0),
+            Token::new(TokenType::Nil, "".to_string(), None, 0),
+            Token::new(
+                TokenType::Number,
+                "12".to_string(),
+                Some(crate::token::LiteralValue::IntValue(12)),
+                0,
+            ),
+            Token::new(
+                TokenType::String,
+                "hello".to_string(),
+                Some(crate::token::LiteralValue::StringValue(String::from(
+                    "hello",
+                ))),
+                0,
+            ),
+            Token::new(
+                TokenType::String,
+                "hello".to_string(),
+                Some(crate::token::LiteralValue::IdentifierValue(String::from(
+                    "hello",
+                ))),
+                0,
+            ),
+        ];
+
+        let responses: Vec<LiteralValue> = vec![
+            LiteralValue::False,
+            LiteralValue::True,
+            LiteralValue::Nil,
+            LiteralValue::IntValue(12),
+            LiteralValue::StringValue(String::from("hello")),
+            LiteralValue::StringValue(String::from("hello")),
+        ];
+
+        let evaluated_expressions = tokens
+            .iter()
+            .map(|token| LiteralValue::from_token(token.clone()))
+            .collect::<Vec<LiteralValue>>();
 
         assert_eq!(evaluated_expressions, responses);
     }

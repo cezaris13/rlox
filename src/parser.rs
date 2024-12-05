@@ -112,7 +112,7 @@ impl Parser {
 
     fn expression_statement(&mut self) -> Result<Statement, String> {
         let expression = self.expression()?;
-        self.consume(Semicolon, "Exprected ';' after the value.")?;
+        self.consume(Semicolon, "Expected ';' after the value.")?;
 
         Ok(Statement::Expression { expression })
     }

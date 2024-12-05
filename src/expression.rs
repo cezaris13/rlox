@@ -137,10 +137,6 @@ impl Expression {
         }
     }
 
-    fn print(&self) {
-        println!("{}", self.to_string());
-    }
-
     // region evaluation
 
     pub fn evaluate(&self, environment: &mut Environment) -> Result<LiteralValue, String> {
