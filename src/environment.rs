@@ -3,6 +3,10 @@ use crate::expression::LiteralValue;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+#[cfg(test)]
+#[path = "./tests/environment_tests.rs"]
+mod tests;
+
 pub struct Environment {
     values: HashMap<String, LiteralValue>,
     pub enclosing: Option<Rc<Environment>>,
@@ -44,15 +48,5 @@ impl Environment {
                 _ => Err(format!("Undefined variable {}", name)),
             },
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn try_init() {
-        let environment = Environment::new();
     }
 }
