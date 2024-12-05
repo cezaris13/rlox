@@ -64,14 +64,7 @@ impl<'a> Scanner<'a> {
             .push(Token::new(Eof, "".to_string(), None, self.line));
 
         if errors.len() > 0 {
-            let mut joined = String::new();
-            let _ = errors
-                .iter()
-                .map(|msg| {
-                    joined.push_str(&msg);
-                    joined.push_str("\n");
-                })
-                .collect::<Vec<_>>();
+            let joined = errors.join("\n");
             return Err(joined);
         }
 

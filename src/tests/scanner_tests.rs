@@ -66,7 +66,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err(),
-            Some("Unterminated string at line 1\n".to_string())
+            Some("Unterminated string at line 1".to_string())
         );
     }
 
@@ -148,7 +148,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err(),
-            Some("Unterminated multiline comment at line 3\n".to_string())
+            Some("Unterminated multiline comment at line 3".to_string())
         );
         assert_eq!(scanner.tokens.len(), 1);
         assert_eq!(scanner.tokens[0].token_type, Eof);
@@ -165,7 +165,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err(),
-            Some("Extra multiline ending comment at line 1\n".to_string())
+            Some("Extra multiline ending comment at line 1".to_string())
         );
         assert_eq!(scanner.tokens.len(), 1);
         assert_eq!(scanner.tokens[0].token_type, Eof);
