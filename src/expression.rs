@@ -64,29 +64,22 @@ impl LiteralValue {
         }
     }
 
-    pub fn is_falsy(&self) -> LiteralValue {
+    pub fn is_falsy(&self) -> Self {
         match self {
-            IntValue(x) => {
-                if *x == 0 {
-                    return Self::True;
-                }
-                Self::False
-            }
-            FValue(x) => {
-                if *x == 0.0 {
-                    return Self::True;
-                }
-                Self::False
-            }
+            IntValue(x) => self.bool_to_literal_bool(*x == 0),
+            FValue(x) => self.bool_to_literal_bool(*x == 0.0),
+            StringValue(string) => self.bool_to_literal_bool(string.len() == 0),
             Self::True => Self::False,
             Self::False => Self::True,
-            StringValue(string) => {
-                if string.len() == 0 {
-                    return Self::True;
-                }
-                Self::False
-            }
             Self::Nil => Self::True,
+        }
+    }
+
+    fn bool_to_literal_bool(&self, expression: bool) -> Self {
+        if expression {
+            Self::True
+        } else {
+            Self::False
         }
     }
 }
@@ -166,7 +159,7 @@ impl Expression {
                     (any, Bang) => Ok(any.is_falsy()),
                     _ => {
                         return Err(format!(
-                            "Any othe non unary operator {:?} is not implemented for {}",
+                            "Non unary operator {:?} is not implemented for {}",
                             operator.token_type,
                             right.to_type(),
                         ))
@@ -259,19 +252,8 @@ impl Expression {
         left: LiteralValue,
         right: LiteralValue,
     ) -> Result<LiteralValue, String> {
-        match right {
-            IntValue(x) => {
-                if x == 0 {
-                    return Err(String::from("Division by 0"));
-                }
-            }
-
-            FValue(y) => {
-                if y == 0.0 {
-                    return Err(String::from("Division by 0"));
-                }
-            }
-            _ => {}
+        if matches!(right, IntValue(0) | FValue(0.0)) {
+            return Err(String::from("Division by 0"));
         }
 
         match (&left, &right) {

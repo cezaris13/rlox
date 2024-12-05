@@ -15,29 +15,29 @@ pub struct Scanner<'a> {
     start: usize,
     current: usize,
     line: usize,
-    keywords: HashMap<String, TokenType>,
+    keywords: HashMap<&'a str, TokenType>,
 }
 
 impl<'a> Scanner<'a> {
     pub fn new(source: &'a str) -> Self {
-        let mut keywords: HashMap<String, TokenType> = HashMap::new();
+        let mut keywords: HashMap<&str, TokenType> = HashMap::new();
 
-        keywords.insert("and".to_string(), And);
-        keywords.insert("class".to_string(), Class);
-        keywords.insert("else".to_string(), Else);
-        keywords.insert("false".to_string(), False);
-        keywords.insert("for".to_string(), For);
-        keywords.insert("fun".to_string(), Fun);
-        keywords.insert("if".to_string(), If);
-        keywords.insert("nil".to_string(), Nil);
-        keywords.insert("or".to_string(), Or);
-        keywords.insert("print".to_string(), Print);
-        keywords.insert("return".to_string(), Return);
-        keywords.insert("super".to_string(), Super);
-        keywords.insert("this".to_string(), This);
-        keywords.insert("true".to_string(), True);
-        keywords.insert("var".to_string(), Var);
-        keywords.insert("while".to_string(), While);
+        keywords.insert("and", And);
+        keywords.insert("class", Class);
+        keywords.insert("else", Else);
+        keywords.insert("false", False);
+        keywords.insert("for", For);
+        keywords.insert("fun", Fun);
+        keywords.insert("if", If);
+        keywords.insert("nil", Nil);
+        keywords.insert("or", Or);
+        keywords.insert("print", Print);
+        keywords.insert("return", Return);
+        keywords.insert("super", Super);
+        keywords.insert("this", This);
+        keywords.insert("true", True);
+        keywords.insert("var", Var);
+        keywords.insert("while", While);
 
         Self {
             source: source,
@@ -206,12 +206,9 @@ impl<'a> Scanner<'a> {
         self.advance();
 
         // rust ranges are inclusive
-        let value = self.source.as_bytes()[self.start + 1..self.current - 1]
-            .iter()
-            .map(|byte| *byte as char)
-            .collect::<String>();
+        let value = &self.source[self.start + 1..self.current - 1];
 
-        self.add_token_lit(String, Some(StringValue(value)));
+        self.add_token_lit(String, Some(StringValue(value.to_string())));
 
         Ok(())
     }
@@ -232,10 +229,7 @@ impl<'a> Scanner<'a> {
             }
         }
 
-        let string_literal = self.source.as_bytes()[self.start..self.current]
-            .iter()
-            .map(|bytes| *bytes as char)
-            .collect::<String>();
+        let string_literal = &self.source[self.start..self.current];
 
         if is_fraction {
             match string_literal.parse::<f64>() {
@@ -257,12 +251,9 @@ impl<'a> Scanner<'a> {
             self.advance();
         }
 
-        let string_literal = self.source.as_bytes()[self.start..self.current]
-            .iter()
-            .map(|bytes| *bytes as char)
-            .collect::<String>();
+        let string_literal = &self.source[self.start..self.current];
 
-        let token_type = self.keywords.get(&string_literal);
+        let token_type = self.keywords.get(string_literal);
 
         let token_type = match token_type {
             Some(token_val) => token_val,

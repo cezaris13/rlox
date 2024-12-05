@@ -82,9 +82,11 @@ impl Parser {
             let blocks = self.blocks()?;
             return Ok(Statement::Block { statements: blocks });
         }
+
         if self.match_tokens(vec![Print]) {
             return self.print_statement();
         }
+
         return self.expression_statement();
     }
 
