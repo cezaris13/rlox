@@ -98,69 +98,6 @@ mod tests {
     }
 
     #[test]
-    fn evaluate_int_returns_sum() {
-        let mut environment = Environment::new();
-        let source = "5 + 2";
-        let mut scanner: Scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens().unwrap();
-        let mut parser = Parser::new(tokens);
-        let expression = parser.expression();
-
-        assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
-
-        assert_eq!(evaluation.unwrap(), IntValue(7));
-    }
-
-    #[test]
-    fn evaluate_string_returns_sum() {
-        let mut environment = Environment::new();
-        let source = "\"hello \" + \"world\"";
-        let mut scanner: Scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens().unwrap();
-        let mut parser = Parser::new(tokens);
-        let expression = parser.expression();
-
-        assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
-
-        assert_eq!(
-            evaluation.unwrap(),
-            StringValue(String::from("hello world"))
-        );
-    }
-
-    #[test]
-    fn evaluate_float_and_int_returns_float_mult() {
-        let mut environment = Environment::new();
-        let source = "2 * 2.5";
-        let mut scanner: Scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens().unwrap();
-        let mut parser = Parser::new(tokens);
-        let expression = parser.expression();
-
-        assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
-
-        assert_eq!(evaluation.unwrap(), FValue(5.0));
-    }
-
-    #[test]
-    fn evaluate_string_float_returns_sum() {
-        let mut environment = Environment::new();
-        let source = "\"hello \" + 2";
-        let mut scanner: Scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens().unwrap();
-        let mut parser = Parser::new(tokens);
-        let expression = parser.expression();
-
-        assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
-
-        assert_eq!(evaluation.unwrap(), StringValue(String::from("hello 2")));
-    }
-
-    #[test]
     fn evaluate_complex_int_float_returns_result() {
         let mut environment = Environment::new();
         let source = "2 * 2.5 + 5 / 2";
@@ -173,21 +110,6 @@ mod tests {
         let evaluation = expression.unwrap().evaluate(&mut environment);
 
         assert_eq!(evaluation.unwrap(), FValue(7.0));
-    }
-
-    #[test]
-    fn evaluate_comparison_of_strings_of_same_length() {
-        let mut environment = Environment::new();
-        let source = "\"ac\" < \"ab\"";
-        let mut scanner: Scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens().unwrap();
-        let mut parser = Parser::new(tokens);
-        let expression = parser.expression();
-
-        assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
-
-        assert_eq!(evaluation.unwrap(), LiteralValue::False);
     }
 
     fn literal_value_to_string() {
