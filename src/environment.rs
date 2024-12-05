@@ -32,9 +32,7 @@ impl Environment {
             }
 
             None => match &self.enclosing {
-                Some(env) => Rc::get_mut(&mut env.clone())
-                    .expect("could not get mutable ref to env")
-                    .assign(name, value),
+                Some(env) => env.borrow_mut().assign(name, value),
                 _ => Err(format!("Variable does not exist {}", name)),
             },
         }
@@ -44,7 +42,7 @@ impl Environment {
         match self.values.get_key_value(name) {
             Some((_, value)) => Ok(value.clone()),
             None => match &self.enclosing {
-                Some(enclosing_environment) => enclosing_environment.get(name),
+                Some(enclosing_environment) => enclosing_environment.borrow().get(name),
                 _ => Err(format!("Undefined variable {}", name)),
             },
         }

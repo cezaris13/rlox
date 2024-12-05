@@ -2,16 +2,17 @@ use crate::environment::Environment;
 use crate::expression::{Expression, LiteralValue};
 use crate::statement::Statement;
 
+use std::cell::RefCell;
 use std::rc::Rc;
 
 pub struct Interpreter {
-    environment: Rc<Environment>,
+    environment: Rc<RefCell<Environment>>,
 }
 
 impl Interpreter {
     pub fn new() -> Self {
         Self {
-            environment: Rc::new(Environment::new()),
+            environment: Rc::new(RefCell::new(Environment::new())),
         }
     }
 
@@ -19,16 +20,10 @@ impl Interpreter {
         for statement in statements {
             match statement {
                 Statement::Expression { expression } => {
-                    let _ = expression.evaluate(
-                        Rc::get_mut(&mut self.environment)
-                            .expect("Could not get mutable reference to environment"),
-                    )?;
+                    let _ = expression.evaluate(&mut self.environment.borrow_mut())?;
                 }
                 Statement::Print { expression } => {
-                    let result = expression.evaluate(
-                        Rc::get_mut(&mut self.environment)
-                            .expect("Could not get mutable reference to environment"),
-                    )?;
+                    let result = expression.evaluate(&mut self.environment.borrow_mut())?;
                     println!("{}", result.to_string());
                 }
                 Statement::Variable { token, initializer } => {
@@ -37,26 +32,24 @@ impl Interpreter {
                     };
 
                     let value = if initializer != nil {
-                        initializer.evaluate(
-                            Rc::get_mut(&mut self.environment)
-                                .expect("Could not get mutable reference to environment"),
-                        )?
+                        initializer.evaluate(&mut self.environment.borrow_mut())?
                     } else {
                         LiteralValue::Nil
                     };
-                    Rc::get_mut(&mut self.environment)
-                        .expect("Could not get mutable reference to environment")
-                        .define(token.lexeme, value);
+                    self.environment.borrow_mut().define(token.lexeme, value);
                 }
                 Statement::Block { statements } => {
                     let mut new_environment = Environment::new();
                     new_environment.enclosing = Some(self.environment.clone());
+                    dbg!(&self.environment);
 
                     let old_environment = self.environment.clone();
-                    self.environment = Rc::new(new_environment);
+                    self.environment = Rc::new(RefCell::new(new_environment));
                     let block_result = self.interpret_statements(statements);
+                    dbg!(&self.environment);
                     self.environment = old_environment;
 
+                    dbg!(&self.environment);
                     block_result?
                 }
             };
