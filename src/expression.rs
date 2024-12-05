@@ -1,8 +1,7 @@
 use crate::environment::Environment;
-use crate::expr::LiteralValue::*;
-use crate::token::Token;
-use crate::token::TokenType;
+use crate::expression::LiteralValue::*;
 use crate::token::TokenType::*;
+use crate::token::{Token, TokenType};
 
 use std::string::String;
 
@@ -367,8 +366,8 @@ impl Expression {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::expr::Expression;
-    use crate::expr::Expression::*;
+    use crate::expression::Expression;
+    use crate::expression::Expression::*;
     use crate::Parser;
     use crate::Scanner;
 

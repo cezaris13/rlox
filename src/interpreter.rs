@@ -1,6 +1,6 @@
 use crate::environment::Environment;
-use crate::expr::{Expression, LiteralValue};
-use crate::stmt::Statement;
+use crate::expression::{Expression, LiteralValue};
+use crate::statement::Statement;
 
 use std::rc::Rc;
 

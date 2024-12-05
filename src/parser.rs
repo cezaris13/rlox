@@ -1,10 +1,8 @@
-use crate::expr::Expression;
-use crate::expr::Expression::*;
-use crate::expr::LiteralValue;
-use crate::stmt::Statement;
-use crate::token::Token;
-use crate::token::TokenType;
+use crate::expression::Expression::*;
+use crate::expression::{Expression, LiteralValue};
+use crate::statement::Statement;
 use crate::token::TokenType::*;
+use crate::token::{Token, TokenType};
 
 use std::string::String;
 

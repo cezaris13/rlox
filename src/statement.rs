@@ -1,17 +1,17 @@
-use crate::expr;
+use crate::expression;
 use crate::token::Token;
 
 #[derive(Debug)]
 pub enum Statement {
     Expression {
-        expression: expr::Expression,
+        expression: expression::Expression,
     },
     Print {
-        expression: expr::Expression,
+        expression: expression::Expression,
     },
     Variable {
         token: Token,
-        initializer: expr::Expression,
+        initializer: expression::Expression,
     },
 
     Block {

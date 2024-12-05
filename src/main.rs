@@ -1,9 +1,9 @@
 mod environment;
-mod expr;
+mod expression;
 mod interpreter;
 mod parser;
 mod scanner;
-mod stmt;
+mod statement;
 mod token;
 
 use crate::interpreter::Interpreter;
