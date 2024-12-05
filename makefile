@@ -9,3 +9,10 @@ run:
 
 test:
 	cargo test
+
+coverage:
+	cargo llvm-cov
+
+coverage-html:
+	cargo llvm-cov --html
+	open target/llvm-cov/html/index.html

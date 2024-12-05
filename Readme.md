@@ -1,5 +1,9 @@
 
 # Resources
+
+## Requirements:
+- Install cargo llvm-coverage for coverage reports
+
 ## For playing with bnf
 [Bnf playground](https://bnfplayground.pauliankline.com/)
 
