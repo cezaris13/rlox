@@ -3,6 +3,7 @@ mod tests {
     use crate::environment::Environment;
     use crate::expression::LiteralValue::*;
 
+    use std::cell::RefCell;
     use std::rc::Rc;
 
     #[test]
@@ -30,10 +31,12 @@ mod tests {
     #[test]
     fn get_value_from_enclosing() {
         let mut environment = Environment::new();
-        let mut environment_enclosing = Environment::new();
-        environment_enclosing.define(String::from("test"), True);
+        let environment_enclosing = Rc::new(RefCell::new(Environment::new()));
+        environment_enclosing
+            .borrow_mut()
+            .define(String::from("test"), True);
 
-        environment.enclosing = Some(Rc::new(environment_enclosing));
+        environment.enclosing = Some(environment_enclosing.clone());
 
         let variable = environment.get("test");
 
@@ -44,17 +47,20 @@ mod tests {
 
     #[test]
     fn assign_value_from_enclosing() {
-        let mut environment = Environment::new();
-        let mut environment_enclosing = Environment::new();
-        environment_enclosing.define(String::from("test"), True);
+        let environment_parent = Rc::new(RefCell::new(Environment::new()));
+        let mut environment_child = Environment::new();
 
-        environment.enclosing = Some(Rc::new(environment_enclosing));
+        environment_parent
+            .borrow_mut()
+            .define(String::from("test"), True);
 
-        let result = environment.assign(String::from("test"), False);
+        environment_child.enclosing = Some(environment_parent.clone());
+
+        let result = environment_child.assign(String::from("test"), False);
 
         assert!(result.is_ok());
 
-        assert_eq!(environment.get("test"), Ok(True));
+        assert_eq!(environment_parent.borrow_mut().get("test"), Ok(False));
     }
 
     #[test]

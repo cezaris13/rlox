@@ -1,5 +1,6 @@
 use crate::expression::LiteralValue;
 
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -7,9 +8,10 @@ use std::rc::Rc;
 #[path = "./tests/environment_tests.rs"]
 mod tests;
 
+#[derive(Debug)]
 pub struct Environment {
     values: HashMap<String, LiteralValue>,
-    pub enclosing: Option<Rc<Environment>>,
+    pub enclosing: Option<Rc<RefCell<Environment>>>,
 }
 
 impl Environment {

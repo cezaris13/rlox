@@ -118,6 +118,7 @@ mod tests {
         assert_eq!(evaluation.unwrap(), FValue(7.0));
     }
 
+    #[test]
     fn literal_value_to_string() {
         let literals = vec![
             LiteralValue::Nil,
@@ -141,6 +142,7 @@ mod tests {
         assert_eq!(result, responses);
     }
 
+    #[test]
     fn literal_value_to_type() {
         let literals = vec![
             LiteralValue::Nil,
