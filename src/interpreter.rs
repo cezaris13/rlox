@@ -41,15 +41,12 @@ impl Interpreter {
                 Statement::Block { statements } => {
                     let mut new_environment = Environment::new();
                     new_environment.enclosing = Some(self.environment.clone());
-                    dbg!(&self.environment);
 
                     let old_environment = self.environment.clone();
                     self.environment = Rc::new(RefCell::new(new_environment));
                     let block_result = self.interpret_statements(statements);
-                    dbg!(&self.environment);
                     self.environment = old_environment;
 
-                    dbg!(&self.environment);
                     block_result?
                 }
             };
