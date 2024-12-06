@@ -36,42 +36,45 @@ mod tests {
 
     #[test]
     fn test_bang_operator() {
-        let sources = vec!["!0", "!0.0", "!\"hello\"", "!nil", "!!true", "!true"];
-
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::False),
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("!0", Ok(LiteralValue::True)),
+            ("!0.0", Ok(LiteralValue::True)),
+            ("!\"hello\"", Ok(LiteralValue::False)),
+            ("!nil", Ok(LiteralValue::True)),
+            ("!!true", Ok(LiteralValue::True)),
+            ("!true", Ok(LiteralValue::False)),
         ];
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        assert_eq!(evaluated_expressions, responses);
+        let results = evaluate_list_of_sources(&inputs);
+
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_minus_unary_operator() {
-        let sources = vec!["-1", "-1.0", "--12", "-true"];
-
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(IntValue(-1)),
-            Ok(FValue(-1.0)),
-            Ok(IntValue(12)),
-            Err(String::from("Minus not implemented for Bool")),
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("-1", Ok(LiteralValue::IntValue(-1))),
+            ("-1.0", Ok(LiteralValue::FValue(-1.0))),
+            ("--12", Ok(LiteralValue::IntValue(12))),
+            ("-true", Err(String::from("Minus not implemented for Bool"))),
         ];
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        assert_eq!(evaluated_expressions, responses);
+        let results = evaluate_list_of_sources(&inputs);
+
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn evaluate_group() {
-        let mut environment = Environment::new();
         let source = "( 1 + 2 )";
+
+        let mut environment = Environment::new();
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
@@ -142,228 +145,226 @@ mod tests {
 
         assert_eq!(result, responses);
     }
-
     #[test]
     fn test_plus_operator() {
-        let sources = vec![
-            "5+5",
-            "5+5.5",
-            "5.5+5",
-            "5.5+5.5",
-            "\"a\" + \"a\"",
-            "\"a\" + 5",
-            "\"a\" + 5.5",
-            "5.5 + \"a\"",
-            "true + false",
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5+5", Ok(LiteralValue::IntValue(10))),
+            ("5+5.5", Ok(LiteralValue::FValue(10.5))),
+            ("5.5+5", Ok(LiteralValue::FValue(10.5))),
+            ("5.5+5.5", Ok(LiteralValue::FValue(11.0))),
+            (
+                "\"a\" + \"a\"",
+                Ok(LiteralValue::StringValue(String::from("aa"))),
+            ),
+            (
+                "\"a\" + 5",
+                Ok(LiteralValue::StringValue(String::from("a5"))),
+            ),
+            (
+                "\"a\" + 5.5",
+                Ok(LiteralValue::StringValue(String::from("a5.5"))),
+            ),
+            (
+                "5.5 + \"a\"",
+                Ok(LiteralValue::StringValue(String::from("5.5a"))),
+            ),
+            (
+                "true + false",
+                Err(String::from(
+                    "Plus operation is not implemented for: \"true\" and \"false\"",
+                )),
+            ),
         ];
 
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(IntValue(10)),
-            Ok(FValue(10.5)),
-            Ok(FValue(10.5)),
-            Ok(FValue(11.0)),
-            Ok(StringValue(String::from("aa"))),
-            Ok(StringValue(String::from("a5"))),
-            Ok(StringValue(String::from("a5.5"))),
-            Ok(StringValue(String::from("5.5a"))),
-            Err(String::from(
-                "Plus operation is not implemented for: \"true\" and \"false\"",
-            )),
-        ];
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let results = evaluate_list_of_sources(&inputs);
 
-        assert_eq!(evaluated_expressions, responses);
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_minus_operator() {
-        let sources = vec!["5-5", "5-5.5", "5.5-5", "6.0-5.5", "\"a\" - \"a\""];
-
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(IntValue(0)),
-            Ok(FValue(-0.5)),
-            Ok(FValue(0.5)),
-            Ok(FValue(0.5)),
-            Err(String::from(
-                "Minus operation is not implemented for: \"a\" and \"a\"",
-            )),
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5-5", Ok(LiteralValue::IntValue(0))),
+            ("5-5.5", Ok(LiteralValue::FValue(-0.5))),
+            ("5.5-5", Ok(LiteralValue::FValue(0.5))),
+            ("6.0-5.5", Ok(LiteralValue::FValue(0.5))),
+            (
+                "\"a\" - \"a\"",
+                Err(String::from(
+                    "Minus operation is not implemented for: \"a\" and \"a\"",
+                )),
+            ),
         ];
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        assert_eq!(evaluated_expressions, responses);
+        let results = evaluate_list_of_sources(&inputs);
+
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_star_operator() {
-        let sources = vec!["5*5", "5*5.5", "5.5*5", "6.0*5.5", "\"a\" * \"a\""];
-
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(IntValue(25)),
-            Ok(FValue(27.5)),
-            Ok(FValue(27.5)),
-            Ok(FValue(33.0)),
-            Err(String::from(
-                "Star operation is not implemented for: \"a\" and \"a\"",
-            )),
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5*5", Ok(LiteralValue::IntValue(25))),
+            ("5*5.5", Ok(LiteralValue::FValue(27.5))),
+            ("5.5*5", Ok(LiteralValue::FValue(27.5))),
+            ("6.0*5.5", Ok(LiteralValue::FValue(33.0))),
+            (
+                "\"a\" * \"a\"",
+                Err(String::from(
+                    "Star operation is not implemented for: \"a\" and \"a\"",
+                )),
+            ),
         ];
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        assert_eq!(evaluated_expressions, responses);
+        let results = evaluate_list_of_sources(&inputs);
+
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_slash_operator() {
-        let sources = vec![
-            "5/5",
-            "9/1.5",
-            "5.5/5",
-            "27.5/5.5",
-            "\"a\" / \"a\"",
-            "5/0",
-            "5/0.0",
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5/5", Ok(LiteralValue::IntValue(1))),
+            ("9/1.5", Ok(LiteralValue::FValue(6.0))),
+            ("5.5/5", Ok(LiteralValue::FValue(1.1))),
+            ("27.5/5.5", Ok(LiteralValue::FValue(5.0))),
+            (
+                "\"a\" / \"a\"",
+                Err(String::from(
+                    "Slash operation is not implemented for: \"a\" and \"a\"",
+                )),
+            ),
+            ("5/0", Err(String::from("Division by 0"))),
+            ("5/0.0", Err(String::from("Division by 0"))),
         ];
 
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(IntValue(1)),
-            Ok(FValue(6.0)),
-            Ok(FValue(1.1)),
-            Ok(FValue(5.0)),
-            Err(String::from(
-                "Slash operation is not implemented for: \"a\" and \"a\"",
-            )),
-            Err(String::from("Division by 0")),
-            Err(String::from("Division by 0")),
-        ];
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let results = evaluate_list_of_sources(&inputs);
 
-        assert_eq!(evaluated_expressions, responses);
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_less_operator() {
-        let sources = vec![
-            "5<5",
-            "5<5.5",
-            "5.5<5",
-            "6.0<5.5",
-            "\"a\" < \"a\"",
-            "false < true",
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5<5", Ok(LiteralValue::False)),
+            ("5<5.5", Ok(LiteralValue::True)),
+            ("5.5<5", Ok(LiteralValue::False)),
+            ("6.0<5.5", Ok(LiteralValue::False)),
+            ("\"a\" < \"a\"", Ok(LiteralValue::False)),
+            (
+                "false < true",
+                Err(String::from(
+                    "Less operation is not implemented for: \"false\" and \"true\"",
+                )),
+            ),
         ];
 
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::False),
-            Err(String::from(
-                "Less operation is not implemented for: \"false\" and \"true\"",
-            )),
-        ];
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let results = evaluate_list_of_sources(&inputs);
 
-        assert_eq!(evaluated_expressions, responses);
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_less_equal_operator() {
-        let sources = vec![
-            "5<=5",
-            "5<=5.5",
-            "5.5<=5",
-            "6.0<=5.5",
-            "\"a\" <= \"a\"",
-            "false <= true",
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5<=5", Ok(LiteralValue::True)),
+            ("5<=5.5", Ok(LiteralValue::True)),
+            ("5.5<=5", Ok(LiteralValue::False)),
+            ("6.0<=5.5", Ok(LiteralValue::False)),
+            ("\"a\" <= \"a\"", Ok(LiteralValue::True)),
+            (
+                "false <= true",
+                Err(String::from(
+                    "LessEqual operation is not implemented for: \"false\" and \"true\"",
+                )),
+            ),
         ];
 
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::True),
-            Err(String::from(
-                "LessEqual operation is not implemented for: \"false\" and \"true\"",
-            )),
-        ];
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let results = evaluate_list_of_sources(&inputs);
 
-        assert_eq!(evaluated_expressions, responses);
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_greater_operator() {
-        let sources = vec![
-            "5>5",
-            "5>5.5",
-            "5.5>5",
-            "6.0>5.5",
-            "\"a\" > \"a\"",
-            "false > true",
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5>5", Ok(LiteralValue::False)),
+            ("5>5.5", Ok(LiteralValue::False)),
+            ("5.5>5", Ok(LiteralValue::True)),
+            ("6.0>5.5", Ok(LiteralValue::True)),
+            ("\"a\" > \"a\"", Ok(LiteralValue::False)),
+            (
+                "false > true",
+                Err(String::from(
+                    "Greater operation is not implemented for: \"false\" and \"true\"",
+                )),
+            ),
         ];
 
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::False),
-            Err(String::from(
-                "Greater operation is not implemented for: \"false\" and \"true\"",
-            )),
-        ];
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let results = evaluate_list_of_sources(&inputs);
 
-        assert_eq!(evaluated_expressions, responses);
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_greater_equal_operator() {
-        let sources = vec![
-            "5>=5",
-            "5>=5.5",
-            "5.5>=5",
-            "6.0>=5.5",
-            "\"a\" >= \"a\"",
-            "false >= true",
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5>=5", Ok(LiteralValue::True)),
+            ("5>=5.5", Ok(LiteralValue::False)),
+            ("5.5>=5", Ok(LiteralValue::True)),
+            ("6.0>=5.5", Ok(LiteralValue::True)),
+            ("\"a\" >= \"a\"", Ok(LiteralValue::True)),
+            (
+                "false >= true",
+                Err(String::from(
+                    "GreaterEqual operation is not implemented for: \"false\" and \"true\"",
+                )),
+            ),
         ];
 
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::False),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::True),
-            Err(String::from(
-                "GreaterEqual operation is not implemented for: \"false\" and \"true\"",
-            )),
-        ];
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let results = evaluate_list_of_sources(&inputs);
 
-        assert_eq!(evaluated_expressions, responses);
+        assert_eq!(results, expected_results);
     }
 
     #[test]
     fn test_equal_operator() {
-        let sources = vec!["5==5", "5!=5.5", "\"a\" ==\"a\""];
-
-        let responses: Vec<Result<LiteralValue, String>> = vec![
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::True),
-            Ok(LiteralValue::True),
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("5==5", Ok(LiteralValue::True)),
+            ("5!=5.5", Ok(LiteralValue::True)),
+            ("\"a\" ==\"a\"", Ok(LiteralValue::True)),
         ];
 
-        let evaluated_expressions = evaluate_list_of_sources(&sources);
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
 
-        assert_eq!(evaluated_expressions, responses);
+        let results = evaluate_list_of_sources(&inputs);
+
+        assert_eq!(results, expected_results);
     }
 
     #[test]
@@ -424,6 +425,24 @@ mod tests {
                 let mut environment = Environment::new();
                 expression.evaluate(&mut environment)
             })
+            .collect::<Vec<Result<LiteralValue, String>>>()
+    }
+
+    fn get_inputs<'a>(
+        test_cases: &'a Vec<(&'a str, Result<LiteralValue, String>)>,
+    ) -> Vec<&'a str> {
+        test_cases
+            .iter()
+            .map(|(input, _)| *input)
+            .collect::<Vec<&str>>()
+    }
+
+    fn get_expected_results<'a>(
+        test_cases: &'a Vec<(&'a str, Result<LiteralValue, String>)>,
+    ) -> Vec<Result<LiteralValue, String>> {
+        test_cases
+            .iter()
+            .map(|(_, output)| output.clone())
             .collect::<Vec<Result<LiteralValue, String>>>()
     }
 }
