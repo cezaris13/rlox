@@ -37,6 +37,35 @@ mod tests {
         assert_eq!(lines[9], "3628800");
     }
 
+    #[test]
+    fn for_fibonacci_test() {
+        let lines = test_file("./src/tests/cases/for.lox");
+
+        assert_eq!(lines.len(), 21);
+
+        assert_eq!(lines[0], "0");
+        assert_eq!(lines[1], "1");
+        assert_eq!(lines[2], "1");
+        assert_eq!(lines[3], "2");
+        assert_eq!(lines[4], "3");
+        assert_eq!(lines[5], "5");
+        assert_eq!(lines[6], "8");
+        assert_eq!(lines[7], "13");
+        assert_eq!(lines[8], "21");
+        assert_eq!(lines[9], "34");
+        assert_eq!(lines[10], "55");
+        assert_eq!(lines[11], "89");
+        assert_eq!(lines[12], "144");
+        assert_eq!(lines[13], "233");
+        assert_eq!(lines[14], "377");
+        assert_eq!(lines[15], "610");
+        assert_eq!(lines[16], "987");
+        assert_eq!(lines[17], "1597");
+        assert_eq!(lines[18], "2584");
+        assert_eq!(lines[19], "4181");
+        assert_eq!(lines[20], "6765");
+    }
+
     fn test_file(file_path: &str) -> Vec<String> {
         let output = Command::new("cargo")
             .args(["run", file_path])

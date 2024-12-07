@@ -87,6 +87,10 @@ impl Parser {
             return self.while_statement();
         }
 
+        if self.match_tokens(vec![For]) {
+            return self.for_statement();
+        }
+
         if self.match_tokens(vec![If]) {
             return self.if_statement();
         }
@@ -120,6 +124,67 @@ impl Parser {
         let body = Box::new(body_statement);
 
         Ok(Statement::While { condition, body })
+    }
+
+    fn for_statement(&mut self) -> Result<Statement, String> {
+        self.consume(LeftParen, "Expected '(' after 'for")?;
+
+        let initializer: Option<Statement>;
+
+        if self.match_tokens(vec![Semicolon]) {
+            // no initialization
+            initializer = None;
+        } else if self.match_tokens(vec![Var]) {
+            // variable initialization
+            initializer = Some(self.variable_declaration()?);
+        } else {
+            // it's an expression
+            initializer = Some(self.expression_statement()?);
+        }
+
+        let mut condition: Expression = Expression::Literal {
+            value: LiteralValue::True,
+        };
+
+        if !self.check(Semicolon) {
+            condition = self.expression()?;
+        }
+
+        self.consume(Semicolon, "Expect ';' after loop condition")?;
+
+        let mut increment: Option<Expression> = None;
+
+        if !self.check(RightParen) {
+            increment = Some(self.expression()?);
+        }
+
+        self.consume(RightParen, "Expect ')' after for clauses")?;
+
+        let mut body = self.statement()?;
+
+        if let Some(increment) = increment {
+            body = Statement::Block {
+                statements: vec![
+                    body,
+                    Statement::Expression {
+                        expression: increment,
+                    },
+                ],
+            };
+        }
+
+        body = Statement::While {
+            condition: condition,
+            body: Box::new(body),
+        };
+
+        if let Some(initializer) = initializer {
+            body = Statement::Block {
+                statements: vec![initializer, body],
+            };
+        }
+
+        Ok(body)
     }
 
     fn print_statement(&mut self) -> Result<Statement, String> {

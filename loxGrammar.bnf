@@ -40,6 +40,7 @@
               | <block>
               | <ifStatement>
               | <whileStatement>
+              | <forStatement>
 
 <printStatement> ::= "print " <expression> ";"
 
@@ -51,6 +52,10 @@
                   ("else" <statement>)?
 
 <whileStatement> ::= "while" "(" <expression> ")" <statement>
+
+<forStatement> ::= "for" "(" (<variableDeclaration> | <expressionStatement> | ";")
+                         <expression>? ";"
+                         <expression>? ")" <statement>
 
 <expression> ::= <assignment>
 
