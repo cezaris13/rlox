@@ -83,6 +83,10 @@ impl Parser {
             return Ok(Statement::Block { statements: blocks });
         }
 
+        if self.match_tokens(vec![While]) {
+            return self.while_statement();
+        }
+
         if self.match_tokens(vec![If]) {
             return self.if_statement();
         }
@@ -105,6 +109,17 @@ impl Parser {
         self.consume(RightBrace, "Expect '}' after block")?;
 
         Ok(statements)
+    }
+
+    fn while_statement(&mut self) -> Result<Statement, String> {
+        self.consume(LeftParen, "Expected '(' after 'while")?;
+        let condition = self.expression()?;
+        self.consume(RightParen, "Expevted ')' after while condition")?;
+
+        let body_statement = self.statement()?;
+        let body = Box::new(body_statement);
+
+        Ok(Statement::While { condition, body })
     }
 
     fn print_statement(&mut self) -> Result<Statement, String> {

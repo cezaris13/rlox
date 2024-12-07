@@ -92,7 +92,7 @@ impl LiteralValue {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
     Binary {
         left: Box<Expression>,

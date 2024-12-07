@@ -66,6 +66,15 @@ impl Interpreter {
                         self.interpret_statements(vec![*else_branch_value])?;
                     }
                 }
+                Statement::While { condition, body } => {
+                    while !condition
+                        .evaluate(&mut self.environment.borrow_mut())?
+                        .is_falsy()
+                        .literal_bool_to_bool()
+                    {
+                        self.interpret_statements(vec![*body.clone()])?; // fix here??
+                    }
+                }
             };
         }
 

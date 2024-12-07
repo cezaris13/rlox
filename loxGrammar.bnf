@@ -39,6 +39,7 @@
               | <expressionStatement>
               | <block>
               | <ifStatement>
+              | <whileStatement>
 
 <printStatement> ::= "print " <expression> ";"
 
@@ -48,6 +49,8 @@
 
 <ifStatement> ::= "if" "(" <expression> ")" <statement>
                   ("else" <statement>)?
+
+<whileStatement> ::= "while" "(" <expression> ")" <statement>
 
 <expression> ::= <assignment>
 

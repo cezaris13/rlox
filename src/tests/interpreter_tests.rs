@@ -160,4 +160,31 @@ mod tests {
             Ok(LiteralValue::StringValue(String::from("hello")))
         );
     }
+
+    #[test]
+    fn expression_with_while_statement_test() {
+        let source = "
+            var a = 5;
+            while (a < 12) {
+                a = a + 1;
+            }
+          ";
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+        let statements = parser.parse().unwrap();
+
+        let mut interpreter: Interpreter = Interpreter::new();
+        let result = interpreter.interpret_statements(statements);
+
+        assert!(result.is_ok());
+
+        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
+        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().get("a"),
+            Ok(LiteralValue::IntValue(12))
+        );
+    }
 }
