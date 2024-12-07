@@ -60,18 +60,14 @@ impl Interpreter {
                 } => {
                     let condition_value = condition.evaluate(&mut self.environment.borrow_mut())?;
 
-                    if condition_value.is_truthy().to_bool() {
+                    if bool::from(condition_value) {
                         self.interpret_statements(vec![*then_branch])?;
                     } else if let Some(else_branch_value) = else_branch {
                         self.interpret_statements(vec![*else_branch_value])?;
                     }
                 }
                 Statement::While { condition, body } => {
-                    while condition
-                        .evaluate(&mut self.environment.borrow_mut())?
-                        .is_truthy()
-                        .to_bool()
-                    {
+                    while bool::from(condition.evaluate(&mut self.environment.borrow_mut())?) {
                         self.interpret_statements(vec![*body.clone()])?; // fix here??
                     }
                 }

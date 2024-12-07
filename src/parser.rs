@@ -402,7 +402,7 @@ impl Parser {
         if self.match_tokens(vec![String, Number]) {
             let token: Token = self.previous();
             return Ok(Literal {
-                value: LiteralValue::from_token(token),
+                value: LiteralValue::from(token),
             });
         }
 

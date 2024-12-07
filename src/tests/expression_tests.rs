@@ -470,7 +470,7 @@ mod tests {
 
         let evaluated_expressions = tokens
             .iter()
-            .map(|token| LiteralValue::from_token(token.clone()))
+            .map(|token| LiteralValue::from(token.clone()))
             .collect::<Vec<LiteralValue>>();
 
         assert_eq!(evaluated_expressions, responses);

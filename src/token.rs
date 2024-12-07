@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum TokenType {
     // Single-character tokens.
@@ -47,6 +49,64 @@ pub enum TokenType {
     While,
 
     Eof,
+}
+
+impl FromStr for TokenType {
+    type Err = String;
+
+    fn from_str(input: &str) -> Result<TokenType, Self::Err> {
+        match input {
+            "LeftParen" => Ok(TokenType::LeftParen),
+            "RightParen" => Ok(TokenType::RightParen),
+            "LeftBrace" => Ok(TokenType::LeftBrace),
+            "RightBrace" => Ok(TokenType::RightBrace),
+            "Comma" => Ok(TokenType::Comma),
+            "Dot" => Ok(TokenType::Dot),
+            "-" | "Minus" => Ok(TokenType::Minus),
+            "+" | "Plus" => Ok(TokenType::Plus),
+            ";" => Ok(TokenType::Semicolon),
+            "/" | "Slash" => Ok(TokenType::Slash),
+            "*" | "Star" => Ok(TokenType::Star),
+
+            // One or two character tokens
+            "!" => Ok(TokenType::Bang),
+            "BangEqual" => Ok(TokenType::BangEqual),
+            "=" => Ok(TokenType::Equal),
+            "EqualEqual" => Ok(TokenType::EqualEqual),
+            ">" | "Greater" => Ok(TokenType::Greater),
+            ">=" | "GreaterEqual" => Ok(TokenType::GreaterEqual),
+            "<" | "Less" => Ok(TokenType::Less),
+            "<=" | "LessEqual" => Ok(TokenType::LessEqual),
+
+            // Keywords
+            "And" => Ok(TokenType::And),
+            "Class" => Ok(TokenType::Class),
+            "Else" => Ok(TokenType::Else),
+            "False" => Ok(TokenType::False),
+            "Fun" => Ok(TokenType::Fun),
+            "For" => Ok(TokenType::For),
+            "If" => Ok(TokenType::If),
+            "Nil" => Ok(TokenType::Nil),
+            "Or" => Ok(TokenType::Or),
+            "Print" => Ok(TokenType::Print),
+            "Return" => Ok(TokenType::Return),
+            "Super" => Ok(TokenType::Super),
+            "This" => Ok(TokenType::This),
+            "True" => Ok(TokenType::True),
+            "Var" => Ok(TokenType::Var),
+            "While" => Ok(TokenType::While),
+
+            // Literals
+            "Identifier" => Ok(TokenType::Identifier),
+            "String" => Ok(TokenType::String),
+            "Number" => Ok(TokenType::Number),
+
+            // End of file
+            "Eof" => Ok(TokenType::Eof),
+
+            _ => Err(format!("Could not convert '{}' to TokenType", input)),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
