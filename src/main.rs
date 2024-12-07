@@ -15,6 +15,10 @@ use std::fs;
 use std::io::{stdin, stdout, Write};
 use std::process::exit;
 
+#[cfg(test)]
+#[path = "./tests/main_tests.rs"]
+mod tests;
+
 fn run_file(path: &str) -> Result<(), String> {
     let mut interpreter: Interpreter = Interpreter::new();
     match fs::read_to_string(path) {
