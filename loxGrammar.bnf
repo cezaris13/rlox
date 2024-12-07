@@ -38,12 +38,16 @@
 <statement> ::= <printStatement>
               | <expressionStatement>
               | <block>
+              | <ifStatement>
 
 <printStatement> ::= "print " <expression> ";"
 
 <expressionStatement> ::= <expression> ";"
 
 <block> ::= "{" <declaration> "}"
+
+<ifStatement> ::= "if" "(" <expression> ")" <statement>
+                  ("else" <statement>)?
 
 <expression> ::= <assignment>
 
@@ -73,7 +77,6 @@
 
 <number> ::= <integer> "." <digit>+
            | <integer>
-
 
 <integer> ::= <digit>+
 

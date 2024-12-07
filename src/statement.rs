@@ -17,4 +17,10 @@ pub enum Statement {
     Block {
         statements: Vec<Statement>,
     },
+
+    If {
+        condition: expression::Expression,
+        then_branch: Box<Statement>,
+        else_branch: Option<Box<Statement>>,
+    },
 }

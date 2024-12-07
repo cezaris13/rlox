@@ -66,16 +66,24 @@ impl LiteralValue {
 
     pub fn is_falsy(&self) -> Self {
         match self {
-            IntValue(x) => self.bool_to_literal_bool(*x == 0),
-            FValue(x) => self.bool_to_literal_bool(*x == 0.0),
-            StringValue(string) => self.bool_to_literal_bool(string.len() == 0),
+            IntValue(x) => Self::bool_to_literal_bool(*x == 0),
+            FValue(x) => Self::bool_to_literal_bool(*x == 0.0),
+            StringValue(string) => Self::bool_to_literal_bool(string.len() == 0),
             Self::True => Self::False,
             Self::False => Self::True,
             Self::Nil => Self::True,
         }
     }
 
-    fn bool_to_literal_bool(&self, expression: bool) -> Self {
+    pub fn literal_bool_to_bool(&self) -> bool {
+        if *self == Self::True {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn bool_to_literal_bool(expression: bool) -> Self {
         if expression {
             Self::True
         } else {
@@ -151,13 +159,11 @@ impl Expression {
                     (FValue(value), Minus) => Ok(FValue(-value)),
                     (_, Minus) => Err(format!("Minus not implemented for {}", right.to_type())),
                     (any, Bang) => Ok(any.is_falsy()),
-                    _ => {
-                        Err(format!(
-                            "Non unary operator {:?} is not implemented for {}",
-                            operator.token_type,
-                            right.to_type(),
-                        ))
-                    }
+                    _ => Err(format!(
+                        "Non unary operator {:?} is not implemented for {}",
+                        operator.token_type,
+                        right.to_type(),
+                    )),
                 }
             }
             Expression::Binary {
@@ -177,8 +183,8 @@ impl Expression {
                     GreaterEqual => self.process_greater_equal_operator(left, right),
                     Less => self.process_less_operator(left, right),
                     LessEqual => self.process_less_equal_operator(left, right),
-                    BangEqual => Ok(self.bool_to_literal_value_bool(left != right)),
-                    EqualEqual => Ok(self.bool_to_literal_value_bool(left == right)),
+                    BangEqual => Ok(LiteralValue::bool_to_literal_bool(left != right)),
+                    EqualEqual => Ok(LiteralValue::bool_to_literal_bool(left == right)),
                     _ => self.not_implemented_error(&operator.token_type, &left, &right),
                 }
             }
@@ -265,11 +271,11 @@ impl Expression {
         right: LiteralValue,
     ) -> Result<LiteralValue, String> {
         match (&left, &right) {
-            (IntValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(x > y)),
-            (FValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(x > y)),
-            (IntValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(*x as f64 > *y)),
-            (FValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(*x > *y as f64)),
-            (StringValue(x), StringValue(y)) => Ok(self.bool_to_literal_value_bool(x > y)),
+            (IntValue(x), IntValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x > y)),
+            (FValue(x), FValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x > y)),
+            (IntValue(x), FValue(y)) => Ok(LiteralValue::bool_to_literal_bool(*x as f64 > *y)),
+            (FValue(x), IntValue(y)) => Ok(LiteralValue::bool_to_literal_bool(*x > *y as f64)),
+            (StringValue(x), StringValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x > y)),
             _ => self.not_implemented_error(&Greater, &left, &right),
         }
     }
@@ -280,11 +286,11 @@ impl Expression {
         right: LiteralValue,
     ) -> Result<LiteralValue, String> {
         match (&left, &right) {
-            (IntValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(x >= y)),
-            (FValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(x >= y)),
-            (IntValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(*x as f64 >= *y)),
-            (FValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(*x >= *y as f64)),
-            (StringValue(x), StringValue(y)) => Ok(self.bool_to_literal_value_bool(x >= y)),
+            (IntValue(x), IntValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x >= y)),
+            (FValue(x), FValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x >= y)),
+            (IntValue(x), FValue(y)) => Ok(LiteralValue::bool_to_literal_bool(*x as f64 >= *y)),
+            (FValue(x), IntValue(y)) => Ok(LiteralValue::bool_to_literal_bool(*x >= *y as f64)),
+            (StringValue(x), StringValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x >= y)),
             _ => self.not_implemented_error(&GreaterEqual, &left, &right),
         }
     }
@@ -295,11 +301,11 @@ impl Expression {
         right: LiteralValue,
     ) -> Result<LiteralValue, String> {
         match (&left, &right) {
-            (IntValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(x < y)),
-            (FValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(x < y)),
-            (IntValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool((*x as f64) < *y)),
-            (FValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(*x < *y as f64)),
-            (StringValue(x), StringValue(y)) => Ok(self.bool_to_literal_value_bool(x < y)),
+            (IntValue(x), IntValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x < y)),
+            (FValue(x), FValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x < y)),
+            (IntValue(x), FValue(y)) => Ok(LiteralValue::bool_to_literal_bool((*x as f64) < *y)),
+            (FValue(x), IntValue(y)) => Ok(LiteralValue::bool_to_literal_bool(*x < *y as f64)),
+            (StringValue(x), StringValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x < y)),
             _ => self.not_implemented_error(&Less, &left, &right),
         }
     }
@@ -310,20 +316,13 @@ impl Expression {
         right: LiteralValue,
     ) -> Result<LiteralValue, String> {
         match (&left, &right) {
-            (IntValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(x <= y)),
-            (FValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(x <= y)),
-            (IntValue(x), FValue(y)) => Ok(self.bool_to_literal_value_bool(*x as f64 <= *y)),
-            (FValue(x), IntValue(y)) => Ok(self.bool_to_literal_value_bool(*x <= *y as f64)),
-            (StringValue(x), StringValue(y)) => Ok(self.bool_to_literal_value_bool(x <= y)),
+            (IntValue(x), IntValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x <= y)),
+            (FValue(x), FValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x <= y)),
+            (IntValue(x), FValue(y)) => Ok(LiteralValue::bool_to_literal_bool(*x as f64 <= *y)),
+            (FValue(x), IntValue(y)) => Ok(LiteralValue::bool_to_literal_bool(*x <= *y as f64)),
+            (StringValue(x), StringValue(y)) => Ok(LiteralValue::bool_to_literal_bool(x <= y)),
             _ => self.not_implemented_error(&LessEqual, &left, &right),
         }
-    }
-
-    fn bool_to_literal_value_bool(&self, boolean: bool) -> LiteralValue {
-        if boolean {
-            return LiteralValue::True;
-        }
-        LiteralValue::False
     }
 
     fn not_implemented_error(

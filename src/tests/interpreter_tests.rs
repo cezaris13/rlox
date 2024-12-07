@@ -116,4 +116,48 @@ mod tests {
             Ok(LiteralValue::StringValue(String::from("global c")))
         );
     }
+
+    #[test]
+    fn expression_with_if_statement_test() {
+        let source = "
+            var a = 5;
+            var b = 6;
+            var c = 12;
+
+            if (a < 5) {
+                b = 12;
+            } else {
+                b = 13;
+            }
+
+            if (b == 13) {
+                c = \"hello\";
+            }
+          ";
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+        let statements = parser.parse().unwrap();
+
+        let mut interpreter: Interpreter = Interpreter::new();
+        let result = interpreter.interpret_statements(statements);
+
+        assert!(result.is_ok());
+
+        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
+        assert_eq!(interpreter.environment.borrow().values.len(), 3);
+        assert_eq!(
+            interpreter.environment.borrow().get("a"),
+            Ok(LiteralValue::IntValue(5))
+        );
+        assert_eq!(
+            interpreter.environment.borrow().get("b"),
+            Ok(LiteralValue::IntValue(13))
+        );
+        assert_eq!(
+            interpreter.environment.borrow().get("c"),
+            Ok(LiteralValue::StringValue(String::from("hello")))
+        );
+    }
 }

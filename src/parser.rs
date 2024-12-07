@@ -83,6 +83,10 @@ impl Parser {
             return Ok(Statement::Block { statements: blocks });
         }
 
+        if self.match_tokens(vec![If]) {
+            return self.if_statement();
+        }
+
         if self.match_tokens(vec![Print]) {
             return self.print_statement();
         }
@@ -115,6 +119,28 @@ impl Parser {
         self.consume(Semicolon, "Expected ';' after the value.")?;
 
         Ok(Statement::Expression { expression })
+    }
+
+    fn if_statement(&mut self) -> Result<Statement, String> {
+        self.consume(LeftParen, "Expected '(' after 'if'")?;
+        let condition = self.expression()?;
+        self.consume(RightParen, "Expected ')' after if condition")?;
+
+        let then_statement = self.statement()?;
+        let then_branch = Box::new(then_statement);
+
+        let mut else_branch: Option<Box<Statement>> = None;
+
+        if self.match_tokens(vec![Else]) {
+            let statement = self.statement()?;
+            else_branch = Some(Box::new(statement));
+        }
+
+        Ok(Statement::If {
+            condition,
+            then_branch,
+            else_branch,
+        })
     }
 
     pub fn expression(self: &mut Self) -> Result<Expression, String> {

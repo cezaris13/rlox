@@ -53,6 +53,19 @@ impl Interpreter {
 
                     block_result?
                 }
+                Statement::If {
+                    condition,
+                    then_branch,
+                    else_branch,
+                } => {
+                    let condition_value = condition.evaluate(&mut self.environment.borrow_mut())?;
+
+                    if !condition_value.is_falsy().literal_bool_to_bool() {
+                        self.interpret_statements(vec![*then_branch])?;
+                    } else if let Some(else_branch_value) = else_branch {
+                        self.interpret_statements(vec![*else_branch_value])?;
+                    }
+                }
             };
         }
 
