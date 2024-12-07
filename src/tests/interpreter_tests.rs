@@ -187,4 +187,85 @@ mod tests {
             Ok(LiteralValue::IntValue(12))
         );
     }
+
+    #[test]
+    fn expression_with_for_statement_test() {
+        let source = "
+            var i;
+            for (i = 0; i < 10; i = i + 1) {
+                print i;
+            }
+          ";
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+        let statements = parser.parse().unwrap();
+
+        let mut interpreter: Interpreter = Interpreter::new();
+        let result = interpreter.interpret_statements(statements);
+
+        assert!(result.is_ok());
+
+        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
+        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().get("i"),
+            Ok(LiteralValue::IntValue(10))
+        );
+    }
+
+    #[test]
+    fn expression_with_for_statement_no_initializer_test() {
+        let source = "
+            var i=0;
+            for (;i < 10; i = i + 1) {
+                print i;
+            }
+          ";
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+        let statements = parser.parse().unwrap();
+
+        let mut interpreter: Interpreter = Interpreter::new();
+        let result = interpreter.interpret_statements(statements);
+
+        assert!(result.is_ok());
+
+        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
+        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().get("i"),
+            Ok(LiteralValue::IntValue(10))
+        );
+    }
+
+    #[test]
+    fn expression_with_for_statement_initializer_test() {
+        let source = "
+            var a=0;
+            for (var i = 0;i < 10; i = i + 1) {
+                a = a + 2;
+            }
+          ";
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+        let statements = parser.parse().unwrap();
+
+        let mut interpreter: Interpreter = Interpreter::new();
+        let result = interpreter.interpret_statements(statements);
+
+        assert!(result.is_ok());
+
+        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
+        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().get("a"),
+            Ok(LiteralValue::IntValue(20))
+        );
+    }
 }
