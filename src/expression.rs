@@ -52,9 +52,6 @@ impl LiteralValue {
                 Some(crate::token::LiteralValue::StringValue(string_value)) => {
                     StringValue(string_value)
                 }
-                Some(crate::token::LiteralValue::IdentifierValue(id_value)) => {
-                    StringValue(id_value)
-                }
                 _ => panic!("Could not unwrap as String"),
             },
             TokenType::False => Self::False,
@@ -75,7 +72,18 @@ impl LiteralValue {
         }
     }
 
-    pub fn literal_bool_to_bool(&self) -> bool {
+    pub fn is_truthy(&self) -> Self {
+        match self {
+            IntValue(x) => Self::bool_to_literal_bool(*x != 0),
+            FValue(x) => Self::bool_to_literal_bool(*x != 0.0),
+            StringValue(string) => Self::bool_to_literal_bool(string.len() != 0),
+            Self::True => Self::True,
+            Self::False => Self::False,
+            Self::Nil => Self::False,
+        }
+    }
+
+    pub fn to_bool(&self) -> bool {
         if *self == Self::True {
             true
         } else {
@@ -124,6 +132,7 @@ pub enum Expression {
 }
 
 impl Expression {
+    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         match self {
             Expression::Binary {
@@ -229,11 +238,11 @@ impl Expression {
                 let left_value = left.evaluate(environment)?;
 
                 if operator.token_type == Or {
-                    if !left_value.is_falsy().literal_bool_to_bool() {
+                    if left_value.is_truthy().to_bool() {
                         return Ok(left_value);
                     }
                 } else {
-                    if left_value.is_falsy().literal_bool_to_bool() {
+                    if !left_value.is_truthy().to_bool() {
                         return Ok(left_value);
                     }
                 }

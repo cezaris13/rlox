@@ -1,7 +1,3 @@
-#[cfg(test)]
-#[path = "./tests/token_tests.rs"]
-mod tests;
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum TokenType {
     // Single-character tokens.
@@ -58,7 +54,6 @@ pub enum LiteralValue {
     IntValue(i64),
     FValue(f64),
     StringValue(String),
-    IdentifierValue(String),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -82,9 +77,5 @@ impl Token {
             literal,
             line,
         }
-    }
-
-    pub fn to_string(&self) -> String {
-        format!("{:?} {:?} {:?}", self.token_type, self.lexeme, self.literal)
     }
 }

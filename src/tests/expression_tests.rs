@@ -476,14 +476,6 @@ mod tests {
                 ))),
                 0,
             ),
-            Token::new(
-                TokenType::String,
-                "hello".to_string(),
-                Some(crate::token::LiteralValue::IdentifierValue(String::from(
-                    "hello",
-                ))),
-                0,
-            ),
         ];
 
         let responses: Vec<LiteralValue> = vec![
@@ -491,7 +483,6 @@ mod tests {
             LiteralValue::True,
             LiteralValue::Nil,
             LiteralValue::IntValue(12),
-            LiteralValue::StringValue(String::from("hello")),
             LiteralValue::StringValue(String::from("hello")),
         ];
 

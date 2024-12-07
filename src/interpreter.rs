@@ -60,17 +60,17 @@ impl Interpreter {
                 } => {
                     let condition_value = condition.evaluate(&mut self.environment.borrow_mut())?;
 
-                    if !condition_value.is_falsy().literal_bool_to_bool() {
+                    if condition_value.is_truthy().to_bool() {
                         self.interpret_statements(vec![*then_branch])?;
                     } else if let Some(else_branch_value) = else_branch {
                         self.interpret_statements(vec![*else_branch_value])?;
                     }
                 }
                 Statement::While { condition, body } => {
-                    while !condition
+                    while condition
                         .evaluate(&mut self.environment.borrow_mut())?
-                        .is_falsy()
-                        .literal_bool_to_bool()
+                        .is_truthy()
+                        .to_bool()
                     {
                         self.interpret_statements(vec![*body.clone()])?; // fix here??
                     }
