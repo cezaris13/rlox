@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
     use crate::expression::Expression::*;
-    use crate::parser::Parser;
-    use crate::scanner::Scanner;
     use crate::statement::Statement::{Block, Expression, Variable};
     use crate::token::TokenType::*;
     use crate::token::{LiteralValue, Token};
+    use crate::Parser;
+    use crate::Scanner;
 
     #[test]
     fn test_addition() {

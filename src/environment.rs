@@ -10,7 +10,7 @@ mod tests;
 
 #[derive(Debug)]
 pub struct Environment {
-    values: HashMap<String, LiteralValue>,
+    pub values: HashMap<String, LiteralValue>,
     pub enclosing: Option<Rc<RefCell<Environment>>>,
 }
 

@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use crate::scanner::Scanner;
     use crate::token::LiteralValue::*;
     use crate::token::TokenType::*;
+    use crate::Scanner;
 
     #[test]
     fn handler_one_char_tokens() {

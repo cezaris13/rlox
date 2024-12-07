@@ -5,8 +5,12 @@ use crate::statement::Statement;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[cfg(test)]
+#[path = "./tests/interpreter_tests.rs"]
+mod tests;
+
 pub struct Interpreter {
-    environment: Rc<RefCell<Environment>>,
+    pub environment: Rc<RefCell<Environment>>,
 }
 
 impl Interpreter {
@@ -20,7 +24,7 @@ impl Interpreter {
         for statement in statements {
             match statement {
                 Statement::Expression { expression } => {
-                    let _ = expression.evaluate(&mut self.environment.borrow_mut())?;
+                    expression.evaluate(&mut self.environment.borrow_mut())?;
                 }
                 Statement::Print { expression } => {
                     let result = expression.evaluate(&mut self.environment.borrow_mut())?;
