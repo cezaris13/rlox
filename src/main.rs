@@ -47,9 +47,8 @@ fn run_prompt() -> Result<(), String> {
             break Ok(());
         }
 
-        match run(&mut interpreter, &input) {
-            Ok(_) => (),
-            Err(message) => println!("{}", message),
+        if let Err(message) = run(&mut interpreter, &input) {
+            println!("{}", message);
         }
     }
 }

@@ -54,9 +54,8 @@ impl<'a> Scanner<'a> {
 
         while !self.is_at_end() {
             self.start = self.current;
-            match self.scan_token() {
-                Ok(_) => (),
-                Err(msg) => errors.push(msg),
+            if let Err(message) = self.scan_token() {
+                errors.push(message);
             }
         }
 
