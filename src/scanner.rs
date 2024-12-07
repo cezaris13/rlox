@@ -49,7 +49,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub fn scan_tokens(self: &mut Self) -> Result<Vec<Token>, String> {
+    pub fn scan_tokens(&mut self) -> Result<Vec<Token>, String> {
         let mut errors = vec![];
 
         while !self.is_at_end() {
@@ -70,7 +70,7 @@ impl<'a> Scanner<'a> {
         Ok(self.tokens.clone()) // temp fix
     }
 
-    fn scan_token(self: &mut Self) -> Result<(), String> {
+    fn scan_token(&mut self) -> Result<(), String> {
         let symbol = self.advance();
 
         match symbol {
@@ -169,11 +169,11 @@ impl<'a> Scanner<'a> {
         Ok(())
     }
 
-    fn add_token(self: &mut Self, token_type: TokenType) {
+    fn add_token(&mut self, token_type: TokenType) {
         self.add_token_lit(token_type, None);
     }
 
-    fn add_token_lit(self: &mut Self, token_type: TokenType, literal: Option<LiteralValue>) {
+    fn add_token_lit(&mut self, token_type: TokenType, literal: Option<LiteralValue>) {
         let text = self.source[self.start..self.current].to_string();
 
         self.tokens
@@ -182,7 +182,7 @@ impl<'a> Scanner<'a> {
 
     // region parser function
 
-    fn string(self: &mut Self) -> Result<(), String> {
+    fn string(&mut self) -> Result<(), String> {
         while self.peek() != '"' && !self.is_at_end() {
             if self.peek() == '\n' {
                 self.line += 1;
@@ -205,7 +205,7 @@ impl<'a> Scanner<'a> {
         Ok(())
     }
 
-    fn number(self: &mut Self) -> Result<(), String> {
+    fn number(&mut self) -> Result<(), String> {
         let mut is_fraction = false;
 
         while self.is_digit(self.peek()) {
@@ -238,7 +238,7 @@ impl<'a> Scanner<'a> {
         Ok(())
     }
 
-    fn identifier(self: &mut Self) {
+    fn identifier(&mut self) {
         while self.is_alpha_numeric(self.peek()) {
             self.advance();
         }
@@ -260,7 +260,7 @@ impl<'a> Scanner<'a> {
         self.current >= self.source.len()
     }
 
-    fn advance(self: &mut Self) -> char {
+    fn advance(&mut self) -> char {
         let symbol = self.source.as_bytes()[self.current];
         self.current += 1;
         symbol as char
@@ -281,7 +281,7 @@ impl<'a> Scanner<'a> {
         self.source.as_bytes()[self.current + 1] as char
     }
 
-    fn match_character(self: &mut Self, character: char) -> bool {
+    fn match_character(&mut self, character: char) -> bool {
         if self.is_at_end() {
             return false;
         }

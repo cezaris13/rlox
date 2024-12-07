@@ -118,7 +118,7 @@ impl Parser {
     fn while_statement(&mut self) -> Result<Statement, String> {
         self.consume(LeftParen, "Expected '(' after 'while")?;
         let condition = self.expression()?;
-        self.consume(RightParen, "Expevted ')' after while condition")?;
+        self.consume(RightParen, "Expected ')' after while condition")?;
 
         let body_statement = self.statement()?;
         let body = Box::new(body_statement);
@@ -142,7 +142,7 @@ impl Parser {
             initializer = Some(self.expression_statement()?);
         }
 
-        let mut condition: Expression = Expression::Literal {
+        let mut condition = Literal {
             value: LiteralValue::True,
         };
 
@@ -223,7 +223,7 @@ impl Parser {
         })
     }
 
-    pub fn expression(self: &mut Self) -> Result<Expression, String> {
+    pub fn expression(&mut self) -> Result<Expression, String> {
         self.assignment()
     }
 
@@ -280,7 +280,7 @@ impl Parser {
         Ok(expression)
     }
 
-    fn equality(self: &mut Self) -> Result<Expression, String> {
+    fn equality(&mut self) -> Result<Expression, String> {
         let mut expression: Expression = self.comparison()?;
 
         while self.match_tokens(vec![BangEqual, EqualEqual]) {
@@ -298,7 +298,7 @@ impl Parser {
         Ok(expression)
     }
 
-    fn comparison(self: &mut Self) -> Result<Expression, String> {
+    fn comparison(&mut self) -> Result<Expression, String> {
         let mut expression: Expression = self.term()?;
 
         while self.match_tokens(vec![Greater, GreaterEqual, Less, LessEqual]) {
@@ -316,7 +316,7 @@ impl Parser {
         Ok(expression)
     }
 
-    fn term(self: &mut Self) -> Result<Expression, String> {
+    fn term(&mut self) -> Result<Expression, String> {
         let mut expression = self.factor()?;
 
         while self.match_tokens(vec![Minus, Plus]) {
@@ -334,7 +334,7 @@ impl Parser {
         Ok(expression)
     }
 
-    fn factor(self: &mut Self) -> Result<Expression, String> {
+    fn factor(&mut self) -> Result<Expression, String> {
         let mut expression = self.unary()?;
 
         while self.match_tokens(vec![Slash, Star]) {
@@ -351,7 +351,7 @@ impl Parser {
         Ok(expression)
     }
 
-    fn unary(self: &mut Self) -> Result<Expression, String> {
+    fn unary(&mut self) -> Result<Expression, String> {
         if self.match_tokens(vec![Bang, Minus]) {
             let operator = self.previous();
             let right = self.unary()?;
@@ -365,7 +365,7 @@ impl Parser {
         self.primary()
     }
 
-    fn primary(self: &mut Self) -> Result<Expression, String> {
+    fn primary(&mut self) -> Result<Expression, String> {
         if self.match_tokens(vec![False]) {
             return Ok(Literal {
                 value: LiteralValue::False,
@@ -433,7 +433,7 @@ impl Parser {
 
     // region helper functions
 
-    fn match_tokens(self: &mut Self, token_types: Vec<TokenType>) -> bool {
+    fn match_tokens(&mut self, token_types: Vec<TokenType>) -> bool {
         for token_type in token_types {
             if self.check(token_type) {
                 self.advance();
@@ -464,14 +464,14 @@ impl Parser {
         self.tokens[self.current].clone()
     }
 
-    fn advance(self: &mut Self) -> Token {
+    fn advance(&mut self) -> Token {
         if !self.is_at_end() {
             self.current += 1;
         }
         self.previous()
     }
 
-    fn consume(self: &mut Self, token_type: TokenType, message: &str) -> Result<Token, String> {
+    fn consume(&mut self, token_type: TokenType, message: &str) -> Result<Token, String> {
         let token = self.peek();
 
         if token.token_type != token_type {

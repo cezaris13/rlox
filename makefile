@@ -16,3 +16,6 @@ coverage:
 coverage-html:
 	cargo llvm-cov --html
 	open target/llvm-cov/html/index.html
+
+loc:
+	find . -name '*.rs' | xargs wc -l

@@ -122,9 +122,9 @@ mod tests {
     #[test]
     fn test_minus_unary_operator() {
         let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
-            ("-1", Ok(LiteralValue::IntValue(-1))),
-            ("-1.0", Ok(LiteralValue::FValue(-1.0))),
-            ("--12", Ok(LiteralValue::IntValue(12))),
+            ("-1", Ok(IntValue(-1))),
+            ("-1.0", Ok(FValue(-1.0))),
+            ("--12", Ok(IntValue(12))),
             ("-true", Err(String::from("Minus not implemented for Bool"))),
         ];
 
@@ -214,26 +214,14 @@ mod tests {
     #[test]
     fn test_plus_operator() {
         let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
-            ("5+5", Ok(LiteralValue::IntValue(10))),
-            ("5+5.5", Ok(LiteralValue::FValue(10.5))),
-            ("5.5+5", Ok(LiteralValue::FValue(10.5))),
-            ("5.5+5.5", Ok(LiteralValue::FValue(11.0))),
-            (
-                "\"a\" + \"a\"",
-                Ok(LiteralValue::StringValue(String::from("aa"))),
-            ),
-            (
-                "\"a\" + 5",
-                Ok(LiteralValue::StringValue(String::from("a5"))),
-            ),
-            (
-                "\"a\" + 5.5",
-                Ok(LiteralValue::StringValue(String::from("a5.5"))),
-            ),
-            (
-                "5.5 + \"a\"",
-                Ok(LiteralValue::StringValue(String::from("5.5a"))),
-            ),
+            ("5+5", Ok(IntValue(10))),
+            ("5+5.5", Ok(FValue(10.5))),
+            ("5.5+5", Ok(FValue(10.5))),
+            ("5.5+5.5", Ok(FValue(11.0))),
+            ("\"a\" + \"a\"", Ok(StringValue(String::from("aa")))),
+            ("\"a\" + 5", Ok(StringValue(String::from("a5")))),
+            ("\"a\" + 5.5", Ok(StringValue(String::from("a5.5")))),
+            ("5.5 + \"a\"", Ok(StringValue(String::from("5.5a")))),
             (
                 "true + false",
                 Err(String::from(
@@ -253,10 +241,10 @@ mod tests {
     #[test]
     fn test_minus_operator() {
         let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
-            ("5-5", Ok(LiteralValue::IntValue(0))),
-            ("5-5.5", Ok(LiteralValue::FValue(-0.5))),
-            ("5.5-5", Ok(LiteralValue::FValue(0.5))),
-            ("6.0-5.5", Ok(LiteralValue::FValue(0.5))),
+            ("5-5", Ok(IntValue(0))),
+            ("5-5.5", Ok(FValue(-0.5))),
+            ("5.5-5", Ok(FValue(0.5))),
+            ("6.0-5.5", Ok(FValue(0.5))),
             (
                 "\"a\" - \"a\"",
                 Err(String::from(
@@ -276,10 +264,10 @@ mod tests {
     #[test]
     fn test_star_operator() {
         let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
-            ("5*5", Ok(LiteralValue::IntValue(25))),
-            ("5*5.5", Ok(LiteralValue::FValue(27.5))),
-            ("5.5*5", Ok(LiteralValue::FValue(27.5))),
-            ("6.0*5.5", Ok(LiteralValue::FValue(33.0))),
+            ("5*5", Ok(IntValue(25))),
+            ("5*5.5", Ok(FValue(27.5))),
+            ("5.5*5", Ok(FValue(27.5))),
+            ("6.0*5.5", Ok(FValue(33.0))),
             (
                 "\"a\" * \"a\"",
                 Err(String::from(
@@ -299,10 +287,10 @@ mod tests {
     #[test]
     fn test_slash_operator() {
         let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
-            ("5/5", Ok(LiteralValue::IntValue(1))),
-            ("9/1.5", Ok(LiteralValue::FValue(6.0))),
-            ("5.5/5", Ok(LiteralValue::FValue(1.1))),
-            ("27.5/5.5", Ok(LiteralValue::FValue(5.0))),
+            ("5/5", Ok(IntValue(1))),
+            ("9/1.5", Ok(FValue(6.0))),
+            ("5.5/5", Ok(FValue(1.1))),
+            ("27.5/5.5", Ok(FValue(5.0))),
             (
                 "\"a\" / \"a\"",
                 Err(String::from(
@@ -436,16 +424,10 @@ mod tests {
     #[test]
     fn test_logical_operators() {
         let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
-            (
-                "\"hi\" or 2",
-                Ok(LiteralValue::StringValue(String::from("hi"))),
-            ),
-            (
-                "nil or \"yes\"",
-                Ok(LiteralValue::StringValue(String::from("yes"))),
-            ),
-            ("5.5 and 5", Ok(LiteralValue::IntValue(5))),
-            ("0 and 5", Ok(LiteralValue::IntValue(0))),
+            ("\"hi\" or 2", Ok(StringValue(String::from("hi")))),
+            ("nil or \"yes\"", Ok(StringValue(String::from("yes")))),
+            ("5.5 and 5", Ok(IntValue(5))),
+            ("0 and 5", Ok(IntValue(0))),
         ];
 
         let inputs = get_inputs(&test_cases);
