@@ -35,6 +35,72 @@ mod tests {
     }
 
     #[test]
+    fn pretty_print_logical() {
+        let expression: Expression = Logical {
+            left: Box::new(Unary {
+                operator: Token::new(Minus, String::from("-"), None, 1),
+                right: Box::new(Literal {
+                    value: IntValue(123),
+                }),
+            }),
+            operator: Token::new(Or, String::from("or"), None, 1),
+            right: Box::new(Grouping {
+                group: Box::new(Literal {
+                    value: FValue(45.67),
+                }),
+            }),
+        };
+
+        let result = expression.to_string();
+        assert_eq!(result, "(or (- 123) (group 45.67))");
+    }
+
+    #[test]
+    fn pretty_print_variable() {
+        let expression: Expression = Variable {
+            token: Token {
+                token_type: Identifier,
+                lexeme: String::from("a"),
+                literal: None,
+                line: 1,
+            },
+        };
+
+        let result = expression.to_string();
+        assert_eq!(result, "(defvar a)");
+    }
+
+    #[test]
+    fn pretty_print_variable_with_value() {
+        let expression: Expression = Variable {
+            token: Token {
+                token_type: String,
+                lexeme: String::from("a"),
+                literal: Some(crate::token::LiteralValue::StringValue(String::from(
+                    "hello",
+                ))),
+                line: 1,
+            },
+        };
+
+        let result = expression.to_string();
+        assert_eq!(result, "(defvar a \"hello\")");
+    }
+
+    #[test]
+    fn pretty_print_assignment() {
+        let expression: Expression = Assign {
+            name: String::from("a"),
+            value: Box::new(Literal {
+                value: IntValue(12),
+            }),
+        };
+
+        let result = expression.to_string();
+        assert_eq!(result, "(= a 12)");
+    }
+
+    #[test]
     fn test_bang_operator() {
         let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
             ("!0", Ok(LiteralValue::True)),
@@ -357,6 +423,29 @@ mod tests {
             ("5==5", Ok(LiteralValue::True)),
             ("5!=5.5", Ok(LiteralValue::True)),
             ("\"a\" ==\"a\"", Ok(LiteralValue::True)),
+        ];
+
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
+
+        let results = evaluate_list_of_sources(&inputs);
+
+        assert_eq!(results, expected_results);
+    }
+
+    #[test]
+    fn test_logical_operators() {
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            (
+                "\"hi\" or 2",
+                Ok(LiteralValue::StringValue(String::from("hi"))),
+            ),
+            (
+                "nil or \"yes\"",
+                Ok(LiteralValue::StringValue(String::from("yes"))),
+            ),
+            ("5.5 and 5", Ok(LiteralValue::IntValue(5))),
+            ("0 and 5", Ok(LiteralValue::IntValue(0))),
         ];
 
         let inputs = get_inputs(&test_cases);

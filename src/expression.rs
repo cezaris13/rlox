@@ -116,12 +116,29 @@ pub enum Expression {
         name: String,
         value: Box<Expression>,
     },
+    Logical {
+        left: Box<Expression>,
+        operator: Token,
+        right: Box<Expression>,
+    },
 }
 
 impl Expression {
     pub fn to_string(&self) -> String {
         match self {
             Expression::Binary {
+                left,
+                operator,
+                right,
+            } => {
+                format!(
+                    "({} {} {})",
+                    operator.lexeme,
+                    left.to_string(),
+                    right.to_string()
+                )
+            }
+            Expression::Logical {
                 left,
                 operator,
                 right,
@@ -140,7 +157,17 @@ impl Expression {
             Expression::Unary { operator, right } => {
                 format!("({} {})", operator.lexeme, right.to_string())
             }
-            Expression::Variable { token } => format!("(defvar {} )", token.lexeme),
+            Expression::Variable { token } => {
+                if let Some(_) = &token.literal {
+                    format!(
+                        "(defvar {} {:?})",
+                        token.lexeme,
+                        LiteralValue::from_token(token.clone()).to_string()
+                    )
+                } else {
+                    format!("(defvar {})", token.lexeme)
+                }
+            }
             Expression::Assign { name, value } => format!("(= {} {})", name, value.to_string()),
         }
     }
@@ -188,13 +215,30 @@ impl Expression {
                     _ => self.not_implemented_error(&operator.token_type, &left, &right),
                 }
             }
-
             Expression::Variable { token } => environment.get(&token.lexeme),
-
             Expression::Assign { name, value } => {
                 let value = value.evaluate(environment)?;
                 environment.assign(name.clone(), value.clone())?; // temp fix
                 Ok(value)
+            }
+            Expression::Logical {
+                left,
+                operator,
+                right,
+            } => {
+                let left_value = left.evaluate(environment)?;
+
+                if operator.token_type == Or {
+                    if !left_value.is_falsy().literal_bool_to_bool() {
+                        return Ok(left_value);
+                    }
+                } else {
+                    if left_value.is_falsy().literal_bool_to_bool() {
+                        return Ok(left_value);
+                    }
+                }
+
+                right.evaluate(environment)
             }
         }
     }

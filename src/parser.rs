@@ -148,7 +148,7 @@ impl Parser {
     }
 
     pub fn assignment(&mut self) -> Result<Expression, String> {
-        let expression = self.equality()?;
+        let expression = self.or()?;
 
         if self.match_tokens(vec![Equal]) {
             let equals = self.previous();
@@ -160,6 +160,41 @@ impl Parser {
                     value: Box::new(value),
                 }),
                 _ => Err(format!("Invalid assignment target {}", equals.lexeme)),
+            };
+        }
+        Ok(expression)
+    }
+
+    pub fn or(&mut self) -> Result<Expression, String> {
+        let mut expression = self.and()?;
+
+        while self.match_tokens(vec![Or]) {
+            let operator = self.previous();
+
+            let right = self.and()?;
+
+            expression = Logical {
+                left: Box::new(expression),
+                operator: operator,
+                right: Box::new(right),
+            };
+        }
+
+        Ok(expression)
+    }
+
+    pub fn and(&mut self) -> Result<Expression, String> {
+        let mut expression = self.equality()?;
+
+        while self.match_tokens(vec![And]) {
+            let operator = self.previous();
+
+            let right = self.equality()?;
+
+            expression = Logical {
+                left: Box::new(expression),
+                operator: operator,
+                right: Box::new(right),
             };
         }
         Ok(expression)

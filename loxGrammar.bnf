@@ -52,7 +52,11 @@
 <expression> ::= <assignment>
 
 <assignment> ::= <identifier> "=" <assignment>
-               | <equality>
+               | <logicalOr>
+
+<logicalOr> ::= <logicalAnd> ("or" <logicalAnd>)*
+
+<logicalAnd> ::= <equality> ("and" <equality>)*
 
 <equality> ::= <comparison> ( ("==" | "!=") <comparison>)*
 
