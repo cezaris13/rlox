@@ -4,6 +4,10 @@ use crate::token::{Token, TokenType, LiteralValue as TokenLiteralValue};
 use std::fmt::{Display, Formatter};
 use std::string::String;
 
+#[cfg(test)]
+#[path = "./tests/expression_literal_value_tests.rs"]
+mod tests;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum LiteralValue {
     IntValue(i64),
