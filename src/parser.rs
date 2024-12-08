@@ -386,7 +386,7 @@ impl Parser {
         if !self.check(RightParen) {
             loop {
                 if arguments.len() >= 255 {
-                    return Err(format!("Cant't have more than 255 arguments"));
+                    return Err(String::from("Can't have more than 255 arguments"));
                 }
 
                 arguments.push(self.expression()?);
@@ -399,7 +399,7 @@ impl Parser {
 
         let right_paren = self.consume(RightParen, "Expected ')' after arguments.")?;
 
-        Ok(Expression::Call {
+        Ok(Call {
             callee: Box::new(callee),
             paren: right_paren,
             arguments: arguments,

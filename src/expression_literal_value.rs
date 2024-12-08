@@ -25,48 +25,6 @@ pub enum LiteralValue {
     },
 }
 
-impl PartialEq for LiteralValue {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::IntValue(a), Self::IntValue(b)) => a == b,
-            (Self::FValue(a), Self::FValue(b)) => (a - b).abs() < f64::EPSILON,
-            (Self::StringValue(a), Self::StringValue(b)) => a == b,
-            (Self::True, Self::True) => true,
-            (Self::False, Self::False) => true,
-            (Self::Nil, Self::Nil) => true,
-            (
-                Self::Callable {
-                    name: a_name,
-                    arity: a_arity,
-                    fun: _,
-                },
-                Self::Callable {
-                    name: b_name,
-                    arity: b_arity,
-                    fun: _,
-                },
-            ) => a_name == b_name && a_arity == b_arity,
-            _ => false,
-        }
-    }
-}
-
-impl fmt::Debug for LiteralValue {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::IntValue(i) => write!(f, "{}", i),
-            Self::FValue(fl) => write!(f, "{}", fl),
-            Self::StringValue(s) => write!(f, "\"{}\"", s),
-            Self::True => write!(f, "true"),
-            Self::False => write!(f, "false"),
-            Self::Nil => write!(f, "nil"),
-            Self::Callable { name, arity, .. } => {
-                write!(f, "Callable {{ name: {}, arity: {} }}", name, arity)
-            }
-        }
-    }
-}
-
 impl From<Token> for LiteralValue {
     fn from(token: Token) -> Self {
         match token.token_type {
@@ -118,7 +76,7 @@ impl From<LiteralValue> for bool {
 }
 
 impl Display for LiteralValue {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let str = match self {
             IntValue(integer) => integer.to_string(),
             FValue(float) => float.to_string(),
@@ -133,6 +91,48 @@ impl Display for LiteralValue {
             } => format!("Callable: {} {}", name, arity),
         };
         write!(f, "{}", str)
+    }
+}
+
+impl PartialEq for LiteralValue {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (IntValue(a), IntValue(b)) => a == b,
+            (FValue(a), FValue(b)) => (a - b).abs() < f64::EPSILON,
+            (StringValue(a), StringValue(b)) => a == b,
+            (True, True) => true,
+            (False, False) => true,
+            (Nil, Nil) => true,
+            (
+                Callable {
+                    name: a_name,
+                    arity: a_arity,
+                    fun: _,
+                },
+                Callable {
+                    name: b_name,
+                    arity: b_arity,
+                    fun: _,
+                },
+            ) => a_name == b_name && a_arity == b_arity,
+            _ => false,
+        }
+    }
+}
+
+impl fmt::Debug for LiteralValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            IntValue(i) => write!(f, "{}", i),
+            FValue(fl) => write!(f, "{}", fl),
+            StringValue(s) => write!(f, "\"{}\"", s),
+            True => write!(f, "true"),
+            False => write!(f, "false"),
+            Nil => write!(f, "nil"),
+            Callable { name, arity, .. } => {
+                write!(f, "Callable {{ name: {}, arity: {} }}", name, arity)
+            }
+        }
     }
 }
 
