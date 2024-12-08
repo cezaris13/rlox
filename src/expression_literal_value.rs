@@ -2,7 +2,7 @@ use crate::expression_literal_value::LiteralValue::*;
 use crate::token::{LiteralValue as TokenLiteralValue, Token, TokenType};
 
 use std::fmt::{Display, Formatter};
-use std::ops;
+use std::ops::{Add, Sub, Mul, Div};
 use std::string::String;
 
 #[cfg(test)]
@@ -31,9 +31,9 @@ impl From<Token> for LiteralValue {
                 Some(TokenLiteralValue::StringValue(string_value)) => StringValue(string_value),
                 _ => panic!("Could not unwrap as String"),
             },
-            TokenType::False => Self::False,
-            TokenType::True => Self::True,
-            TokenType::Nil => Self::Nil,
+            TokenType::False => False,
+            TokenType::True => True,
+            TokenType::Nil => Nil,
             _ => panic!("Could not create literal value from {}", token),
         }
     }
@@ -42,9 +42,9 @@ impl From<Token> for LiteralValue {
 impl From<bool> for LiteralValue {
     fn from(boolean: bool) -> Self {
         if boolean {
-            Self::True
+            True
         } else {
-            Self::False
+            False
         }
     }
 }
@@ -55,9 +55,9 @@ impl From<&LiteralValue> for bool {
             IntValue(x) => *x != 0,
             FValue(x) => *x != 0.0,
             StringValue(string) => string.len() != 0,
-            LiteralValue::True => true,
-            LiteralValue::False => false,
-            LiteralValue::Nil => false,
+            True => true,
+            False => false,
+            Nil => false,
         }
     }
 }
@@ -74,9 +74,9 @@ impl Display for LiteralValue {
             IntValue(integer) => integer.to_string(),
             FValue(float) => float.to_string(),
             StringValue(string) => string.clone(),
-            Self::True => String::from("true"),
-            Self::False => String::from("false"),
-            Self::Nil => String::from("nil"),
+            True => String::from("true"),
+            False => String::from("false"),
+            Nil => String::from("nil"),
         };
         write!(f, "{}", str)
     }
@@ -87,9 +87,9 @@ impl LiteralValue {
         match self {
             IntValue(_) => "Int",
             FValue(_) => "Float",
-            Self::True | Self::False => "Bool",
+            True | False => "Bool",
             StringValue(_) => "String",
-            Self::Nil => "Nil",
+            Nil => "Nil",
         }
     }
 
@@ -145,7 +145,7 @@ macro_rules! arithmetic_operation {
     };
 }
 
-impl ops::Add<LiteralValue> for LiteralValue {
+impl Add<LiteralValue> for LiteralValue {
     type Output = Result<Self, String>;
 
     fn add(self, _rhs: Self) -> Self::Output {
@@ -153,7 +153,7 @@ impl ops::Add<LiteralValue> for LiteralValue {
     }
 }
 
-impl ops::Sub<LiteralValue> for LiteralValue {
+impl Sub<LiteralValue> for LiteralValue {
     type Output = Result<Self, String>;
 
     fn sub(self, _rhs: Self) -> Self::Output {
@@ -161,7 +161,7 @@ impl ops::Sub<LiteralValue> for LiteralValue {
     }
 }
 
-impl ops::Mul<LiteralValue> for LiteralValue {
+impl Mul<LiteralValue> for LiteralValue {
     type Output = Result<Self, String>;
 
     fn mul(self, _rhs: Self) -> Self::Output {
@@ -169,7 +169,7 @@ impl ops::Mul<LiteralValue> for LiteralValue {
     }
 }
 
-impl ops::Div<LiteralValue> for LiteralValue {
+impl Div<LiteralValue> for LiteralValue {
     type Output = Result<Self, String>;
 
     fn div(self, _rhs: Self) -> Self::Output {
