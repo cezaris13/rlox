@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum TokenType {
@@ -137,5 +138,15 @@ impl Token {
             literal,
             line,
         }
+    }
+}
+
+impl Display for Token {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Token {{ type: {:?}, lexeme: '{}', literal: {:?}, line: {} }}",
+            self.token_type, self.lexeme, self.literal, self.line
+        )
     }
 }

@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::expression::LiteralValue;
+    use crate::expression_literal_value::LiteralValue;
     use crate::Interpreter;
     use crate::Parser;
     use crate::Scanner;

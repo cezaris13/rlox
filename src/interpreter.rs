@@ -1,5 +1,6 @@
 use crate::environment::Environment;
-use crate::expression::{Expression, LiteralValue};
+use crate::expression::Expression;
+use crate::expression_literal_value::LiteralValue;
 use crate::statement::Statement;
 
 use std::cell::RefCell;
@@ -28,7 +29,7 @@ impl Interpreter {
                 }
                 Statement::Print { expression } => {
                     let result = expression.evaluate(&mut self.environment.borrow_mut())?;
-                    println!("{}", result.to_string());
+                    println!("{}", result);
                 }
                 Statement::Variable { token, initializer } => {
                     let nil = Expression::Literal {

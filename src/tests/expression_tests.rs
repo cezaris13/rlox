@@ -5,9 +5,8 @@ mod tests {
     use crate::expression::Expression::*;
     use crate::expression::LiteralValue;
     use crate::expression::LiteralValue::*;
-    use crate::token::Token;
-    use crate::token::TokenType;
     use crate::token::TokenType::*;
+    use crate::token::{Token, TokenType};
     use crate::Parser;
     use crate::Scanner;
 
@@ -84,7 +83,7 @@ mod tests {
         };
 
         let result = expression.to_string();
-        assert_eq!(result, "(defvar a \"hello\")");
+        assert_eq!(result, "(defvar a hello)");
     }
 
     #[test]
@@ -225,7 +224,7 @@ mod tests {
             (
                 "true + false",
                 Err(String::from(
-                    "Plus operation is not implemented for: \"true\" and \"false\"",
+                    "Plus operation is not implemented for: true and false",
                 )),
             ),
         ];
@@ -248,7 +247,7 @@ mod tests {
             (
                 "\"a\" - \"a\"",
                 Err(String::from(
-                    "Minus operation is not implemented for: \"a\" and \"a\"",
+                    "Minus operation is not implemented for: a and a",
                 )),
             ),
         ];
@@ -271,7 +270,7 @@ mod tests {
             (
                 "\"a\" * \"a\"",
                 Err(String::from(
-                    "Star operation is not implemented for: \"a\" and \"a\"",
+                    "Star operation is not implemented for: a and a",
                 )),
             ),
         ];
@@ -294,7 +293,7 @@ mod tests {
             (
                 "\"a\" / \"a\"",
                 Err(String::from(
-                    "Slash operation is not implemented for: \"a\" and \"a\"",
+                    "Slash operation is not implemented for: a and a",
                 )),
             ),
             ("5/0", Err(String::from("Division by 0"))),
@@ -320,7 +319,7 @@ mod tests {
             (
                 "false < true",
                 Err(String::from(
-                    "Less operation is not implemented for: \"false\" and \"true\"",
+                    "Less operation is not implemented for: false and true",
                 )),
             ),
         ];
@@ -344,7 +343,7 @@ mod tests {
             (
                 "false <= true",
                 Err(String::from(
-                    "LessEqual operation is not implemented for: \"false\" and \"true\"",
+                    "LessEqual operation is not implemented for: false and true",
                 )),
             ),
         ];
@@ -368,7 +367,7 @@ mod tests {
             (
                 "false > true",
                 Err(String::from(
-                    "Greater operation is not implemented for: \"false\" and \"true\"",
+                    "Greater operation is not implemented for: false and true",
                 )),
             ),
         ];
@@ -392,7 +391,7 @@ mod tests {
             (
                 "false >= true",
                 Err(String::from(
-                    "GreaterEqual operation is not implemented for: \"false\" and \"true\"",
+                    "GreaterEqual operation is not implemented for: false and true",
                 )),
             ),
         ];

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::environment::Environment;
-    use crate::expression::LiteralValue::*;
+    use crate::expression_literal_value::LiteralValue::*;
 
     use std::cell::RefCell;
     use std::rc::Rc;

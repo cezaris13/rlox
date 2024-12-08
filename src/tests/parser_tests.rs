@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
     use crate::expression::Expression::*;
-    use crate::statement::Statement::{Block, Expression, Variable};
-    use crate::token::TokenType::*;
-    use crate::token::{LiteralValue, Token};
+    use crate::expression_literal_value::LiteralValue as ExpressionLiteralValue;
+    use crate::statement::Statement::{Block, Expression, Variable, Print};
+    use crate::token::{LiteralValue, Token, TokenType::*};
     use crate::Parser;
     use crate::Scanner;
 
@@ -94,7 +94,7 @@ mod tests {
                 line: 1,
             },
             initializer: Literal {
-                value: crate::expression::LiteralValue::Nil,
+                value: ExpressionLiteralValue::Nil,
             },
         };
 
@@ -119,7 +119,7 @@ mod tests {
             expression: Assign {
                 name: std::string::String::from("some_id"),
                 value: Box::new(Literal {
-                    value: crate::expression::LiteralValue::IntValue(2),
+                    value: ExpressionLiteralValue::IntValue(2),
                 }),
             },
         };
@@ -141,11 +141,9 @@ mod tests {
         let mut parser = Parser::new(tokens);
 
         let expression = parser.parse();
-        let response = crate::statement::Statement::Print {
+        let response = Print {
             expression: Literal {
-                value: crate::expression::LiteralValue::StringValue(std::string::String::from(
-                    "hello",
-                )),
+                value: ExpressionLiteralValue::StringValue(std::string::String::from("hello")),
             },
         };
 
@@ -171,7 +169,7 @@ mod tests {
                 expression: Assign {
                     name: std::string::String::from("a"),
                     value: Box::new(Literal {
-                        value: crate::expression::LiteralValue::IntValue(1),
+                        value: ExpressionLiteralValue::IntValue(1),
                     }),
                 },
             }],

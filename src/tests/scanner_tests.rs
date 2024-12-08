@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::token::LiteralValue::*;
-    use crate::token::TokenType::*;
+    use crate::token::{LiteralValue::*, TokenType::*};
     use crate::Scanner;
 
     #[test]

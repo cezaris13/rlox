@@ -1,5 +1,6 @@
+use crate::expression::Expression;
 use crate::expression::Expression::*;
-use crate::expression::{Expression, LiteralValue};
+use crate::expression_literal_value::LiteralValue;
 use crate::statement::Statement;
 use crate::token::TokenType::*;
 use crate::token::{Token, TokenType};
