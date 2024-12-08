@@ -1,7 +1,8 @@
 use crate::expression_literal_value::LiteralValue::*;
-use crate::token::{Token, TokenType, LiteralValue as TokenLiteralValue};
+use crate::token::{LiteralValue as TokenLiteralValue, Token, TokenType};
 
 use std::fmt::{Display, Formatter};
+use std::ops;
 use std::string::String;
 
 #[cfg(test)]
@@ -27,9 +28,7 @@ impl From<Token> for LiteralValue {
                 _ => panic!("Could not unwrap as number"),
             },
             TokenType::String => match token.literal {
-                Some(TokenLiteralValue::StringValue(string_value)) => {
-                    StringValue(string_value)
-                }
+                Some(TokenLiteralValue::StringValue(string_value)) => StringValue(string_value),
                 _ => panic!("Could not unwrap as String"),
             },
             TokenType::False => Self::False,
@@ -105,5 +104,75 @@ impl LiteralValue {
             left,
             right
         ))
+    }
+}
+
+#[macro_export]
+macro_rules! compare_values {
+    ($op_symbol:tt, $left:expr, $right:expr) => {
+        match (&$left, &$right) {
+            (IntValue(x), IntValue(y)) => Ok(LiteralValue::from(x $op_symbol y)),
+            (FValue(x), FValue(y)) => Ok(LiteralValue::from(x $op_symbol y)),
+            (IntValue(x), FValue(y)) => Ok(LiteralValue::from((*x as f64) $op_symbol *y)),
+            (FValue(x), IntValue(y)) => Ok(LiteralValue::from(*x $op_symbol (*y as f64))),
+            (StringValue(x), StringValue(y)) => Ok(LiteralValue::from(x $op_symbol y)),
+            _ => LiteralValue::not_implemented_error(&stringify!($op_symbol), &$left, &$right),
+        }
+    };
+}
+
+macro_rules! arithmetic_operation {
+    ($left: expr, $op_symbol:tt, $right: expr) => {
+        {
+            if stringify!($op_symbol) == "/" && matches!($right, IntValue(0) | FValue(0.0)) {
+                return Err(String::from("Division by 0"));
+            }
+
+            match (&$left, &$right) {
+                (IntValue(x), IntValue(y)) => Ok(IntValue(x $op_symbol y)),
+                (FValue(x), FValue(y)) => Ok(FValue(x $op_symbol y)),
+                (IntValue(x), FValue(y)) => Ok(FValue((*x as f64) $op_symbol y)),
+                (FValue(x), IntValue(y)) => Ok(FValue(x $op_symbol (*y as f64))),
+                (StringValue(string), any) if stringify!($op_symbol) == "+" => {
+                    Ok(StringValue(format!("{0}{1}", string, any)))
+                }
+                (any, StringValue(string)) if stringify!($op_symbol) == "+" => {
+                    Ok(StringValue(format!("{0}{1}", any, string)))
+                }
+                _ => LiteralValue::not_implemented_error(&stringify!($op_symbol), &$left, &$right),
+            }
+        }
+    };
+}
+
+impl ops::Add<LiteralValue> for LiteralValue {
+    type Output = Result<Self, String>;
+
+    fn add(self, _rhs: Self) -> Self::Output {
+        arithmetic_operation!(&self, +, &_rhs)
+    }
+}
+
+impl ops::Sub<LiteralValue> for LiteralValue {
+    type Output = Result<Self, String>;
+
+    fn sub(self, _rhs: Self) -> Self::Output {
+        arithmetic_operation!(&self, -, &_rhs)
+    }
+}
+
+impl ops::Mul<LiteralValue> for LiteralValue {
+    type Output = Result<Self, String>;
+
+    fn mul(self, _rhs: Self) -> Self::Output {
+        arithmetic_operation!(&self, *, &_rhs)
+    }
+}
+
+impl ops::Div<LiteralValue> for LiteralValue {
+    type Output = Result<Self, String>;
+
+    fn div(self, _rhs: Self) -> Self::Output {
+        arithmetic_operation!(&self, /, &_rhs)
     }
 }
