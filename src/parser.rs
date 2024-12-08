@@ -389,7 +389,7 @@ impl Parser {
                     return Err(format!("Cant't have more than 255 arguments"));
                 }
 
-                arguments.push(Box::new(self.expression()?));
+                arguments.push(self.expression()?);
 
                 if !self.match_tokens(vec![Comma]) {
                     break;

@@ -16,10 +16,14 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
-        assert!(interpreter.environment.borrow().values.is_empty());
+        assert_eq!(
+            variable_count,
+            interpreter.environment.borrow().values.len()
+        );
     }
 
     #[test]
@@ -33,11 +37,14 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
-        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
-        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 1
+        );
         assert_eq!(
             interpreter.environment.borrow().get("a"),
             Ok(LiteralValue::IntValue(12))
@@ -55,12 +62,15 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
 
-        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
-        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 1
+        );
         assert_eq!(
             interpreter.environment.borrow().get("a"),
             Ok(LiteralValue::Nil)
@@ -97,12 +107,15 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
 
-        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
-        assert_eq!(interpreter.environment.borrow().values.len(), 3);
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 3
+        );
         assert_eq!(
             interpreter.environment.borrow().get("a"),
             Ok(LiteralValue::StringValue(String::from("global a")))
@@ -141,12 +154,15 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
 
-        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
-        assert_eq!(interpreter.environment.borrow().values.len(), 3);
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 3
+        );
         assert_eq!(
             interpreter.environment.borrow().get("a"),
             Ok(LiteralValue::IntValue(5))
@@ -176,12 +192,14 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
-
-        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
-        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 1
+        );
         assert_eq!(
             interpreter.environment.borrow().get("a"),
             Ok(LiteralValue::IntValue(12))
@@ -203,12 +221,15 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
 
-        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
-        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 1
+        );
         assert_eq!(
             interpreter.environment.borrow().get("i"),
             Ok(LiteralValue::IntValue(10))
@@ -230,12 +251,15 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
 
-        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
-        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 1
+        );
         assert_eq!(
             interpreter.environment.borrow().get("i"),
             Ok(LiteralValue::IntValue(10))
@@ -257,12 +281,15 @@ mod tests {
         let statements = parser.parse().unwrap();
 
         let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
         let result = interpreter.interpret_statements(statements);
 
         assert!(result.is_ok());
 
-        assert_eq!(interpreter.environment.borrow().values.is_empty(), false);
-        assert_eq!(interpreter.environment.borrow().values.len(), 1);
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 1
+        );
         assert_eq!(
             interpreter.environment.borrow().get("a"),
             Ok(LiteralValue::IntValue(20))

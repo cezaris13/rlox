@@ -42,7 +42,7 @@ pub enum Expression {
     Call {
         callee: Box<Expression>,
         paren: Token,
-        arguments: Vec<Box<Expression>>,
+        arguments: Vec<Expression>,
     },
 }
 
@@ -96,7 +96,15 @@ impl Display for Expression {
                 callee,
                 paren: _,
                 arguments,
-            } => format!("({} {:?})", callee, arguments),
+            } => {
+                let comma_separated = arguments
+                    .iter()
+                    .map(|val| val.to_string())
+                    .collect::<Vec<String>>()
+                    .join(",");
+
+                format!("({} [{}])", callee, comma_separated)
+            }
         };
         write!(f, "{}", str)
     }
@@ -139,8 +147,8 @@ impl Expression {
                     GreaterEqual => compare_values!(>=, left, right),
                     Less => compare_values!(<, left, right),
                     LessEqual => compare_values!(<=, left, right),
-                    BangEqual => Ok(LiteralValue::from(left != right)),
-                    EqualEqual => Ok(LiteralValue::from(left == right)),
+                    BangEqual => compare_values!(!=, left, right),
+                    EqualEqual => compare_values!(==, left, right),
                     _ => LiteralValue::not_implemented_error(
                         &stringify!(operator.token_type),
                         &left,
@@ -175,11 +183,35 @@ impl Expression {
             }
             Self::Call {
                 callee,
-                paren,
+                paren: _,
                 arguments,
             } => {
-                println!("{:?} {:?} {:?}", callee, paren, arguments);
-                todo!()
+                let callable = (*callee).evaluate(environment)?;
+                match callable {
+                    Callable { name, arity, fun } => {
+                        if arity != arguments.len() {
+                            return Err(format!(
+                                "Expected {} arguments but got {}.",
+                                arity,
+                                arguments.len()
+                            ));
+                        }
+
+                        let mut parameters = vec![];
+                        for argument in arguments {
+                            let literal = argument.evaluate(environment)?;
+                            parameters.push(literal);
+                        }
+
+                        // figure out if the variable can be the same name as the function??
+                        if let Err(_) = environment.get(&name) {
+                            return Err(format!("undefined function {}", name));
+                        }
+
+                        Ok(fun(&parameters))
+                    }
+                    _ => Err(format!("Cannot use {} as callable", callable.to_type())),
+                }
             }
         }
     }

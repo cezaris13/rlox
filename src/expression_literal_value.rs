@@ -1,15 +1,16 @@
 use crate::expression_literal_value::LiteralValue::*;
 use crate::token::{LiteralValue as TokenLiteralValue, Token, TokenType};
 
-use std::fmt::{Display, Formatter};
-use std::ops::{Add, Sub, Mul, Div};
+use std::fmt::{self, Display, Formatter};
+use std::ops::{Add, Div, Mul, Sub};
+use std::rc::Rc;
 use std::string::String;
 
 #[cfg(test)]
 #[path = "./tests/expression_literal_value_tests.rs"]
 mod tests;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone)]
 pub enum LiteralValue {
     IntValue(i64),
     FValue(f64),
@@ -17,6 +18,53 @@ pub enum LiteralValue {
     True,
     False,
     Nil,
+    Callable {
+        name: String,
+        arity: usize,
+        fun: Rc<dyn Fn(&Vec<LiteralValue>) -> LiteralValue>,
+    },
+}
+
+impl PartialEq for LiteralValue {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::IntValue(a), Self::IntValue(b)) => a == b,
+            (Self::FValue(a), Self::FValue(b)) => (a - b).abs() < f64::EPSILON,
+            (Self::StringValue(a), Self::StringValue(b)) => a == b,
+            (Self::True, Self::True) => true,
+            (Self::False, Self::False) => true,
+            (Self::Nil, Self::Nil) => true,
+            (
+                Self::Callable {
+                    name: a_name,
+                    arity: a_arity,
+                    fun: _,
+                },
+                Self::Callable {
+                    name: b_name,
+                    arity: b_arity,
+                    fun: _,
+                },
+            ) => a_name == b_name && a_arity == b_arity,
+            _ => false,
+        }
+    }
+}
+
+impl fmt::Debug for LiteralValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::IntValue(i) => write!(f, "{}", i),
+            Self::FValue(fl) => write!(f, "{}", fl),
+            Self::StringValue(s) => write!(f, "\"{}\"", s),
+            Self::True => write!(f, "true"),
+            Self::False => write!(f, "false"),
+            Self::Nil => write!(f, "nil"),
+            Self::Callable { name, arity, .. } => {
+                write!(f, "Callable {{ name: {}, arity: {} }}", name, arity)
+            }
+        }
+    }
 }
 
 impl From<Token> for LiteralValue {
@@ -58,6 +106,7 @@ impl From<&LiteralValue> for bool {
             True => true,
             False => false,
             Nil => false,
+            Callable { .. } => todo!(),
         }
     }
 }
@@ -77,6 +126,11 @@ impl Display for LiteralValue {
             True => String::from("true"),
             False => String::from("false"),
             Nil => String::from("nil"),
+            Callable {
+                name,
+                arity,
+                fun: _,
+            } => format!("Callable: {} {}", name, arity),
         };
         write!(f, "{}", str)
     }
@@ -90,6 +144,7 @@ impl LiteralValue {
             True | False => "Bool",
             StringValue(_) => "String",
             Nil => "Nil",
+            Callable { .. } => "Callable",
         }
     }
 

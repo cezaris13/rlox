@@ -8,7 +8,6 @@ use std::rc::Rc;
 #[path = "./tests/environment_tests.rs"]
 mod tests;
 
-#[derive(Debug)]
 pub struct Environment {
     pub values: HashMap<String, LiteralValue>,
     pub enclosing: Option<Rc<RefCell<Environment>>>,
