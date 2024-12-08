@@ -2,7 +2,7 @@
 mod tests {
     use crate::expression::Expression::*;
     use crate::expression_literal_value::LiteralValue as ExpressionLiteralValue;
-    use crate::statement::Statement::{Block, Expression, Variable, Print};
+    use crate::statement::Statement::{Block, Expression, Print, Variable};
     use crate::token::{LiteralValue, Token, TokenType::*};
     use crate::Parser;
     use crate::Scanner;

@@ -39,12 +39,17 @@ pub enum Expression {
         operator: Token,
         right: Box<Expression>,
     },
+    Call {
+        callee: Box<Expression>,
+        paren: Token,
+        arguments: Vec<Box<Expression>>,
+    },
 }
 
 impl Display for Expression {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            Expression::Binary {
+            Self::Binary {
                 left,
                 operator,
                 right,
@@ -56,7 +61,7 @@ impl Display for Expression {
                     right.to_string()
                 )
             }
-            Expression::Logical {
+            Self::Logical {
                 left,
                 operator,
                 right,
@@ -68,14 +73,14 @@ impl Display for Expression {
                     right.to_string()
                 )
             }
-            Expression::Grouping { group } => {
+            Self::Grouping { group } => {
                 format!("(group {})", group.to_string())
             }
-            Expression::Literal { value } => value.to_string(),
-            Expression::Unary { operator, right } => {
+            Self::Literal { value } => value.to_string(),
+            Self::Unary { operator, right } => {
                 format!("({} {})", operator.lexeme, right.to_string())
             }
-            Expression::Variable { token } => {
+            Self::Variable { token } => {
                 if let Some(_) = &token.literal {
                     format!(
                         "(defvar {} {})",
@@ -86,7 +91,12 @@ impl Display for Expression {
                     format!("(defvar {})", token.lexeme)
                 }
             }
-            Expression::Assign { name, value } => format!("(= {} {})", name, value.to_string()),
+            Self::Assign { name, value } => format!("(= {} {})", name, value.to_string()),
+            Self::Call {
+                callee,
+                paren: _,
+                arguments,
+            } => format!("({} {:?})", callee, arguments),
         };
         write!(f, "{}", str)
     }
@@ -95,9 +105,9 @@ impl Display for Expression {
 impl Expression {
     pub fn evaluate(&self, environment: &mut Environment) -> Result<LiteralValue, String> {
         match self {
-            Expression::Literal { value } => Ok(value.clone()),
-            Expression::Grouping { group } => group.evaluate(environment),
-            Expression::Unary { operator, right } => {
+            Self::Literal { value } => Ok(value.clone()),
+            Self::Grouping { group } => group.evaluate(environment),
+            Self::Unary { operator, right } => {
                 let right = (*right).evaluate(environment)?;
 
                 match (&right, &operator.token_type) {
@@ -112,7 +122,7 @@ impl Expression {
                     )),
                 }
             }
-            Expression::Binary {
+            Self::Binary {
                 left,
                 operator,
                 right,
@@ -121,7 +131,7 @@ impl Expression {
                 let right = (*right).evaluate(environment)?;
 
                 match &operator.token_type {
-                    Plus =>  left + right,
+                    Plus => left + right,
                     Minus => left - right,
                     Star => left * right,
                     Slash => left / right,
@@ -138,13 +148,13 @@ impl Expression {
                     ),
                 }
             }
-            Expression::Variable { token } => environment.get(&token.lexeme),
-            Expression::Assign { name, value } => {
+            Self::Variable { token } => environment.get(&token.lexeme),
+            Self::Assign { name, value } => {
                 let value = value.evaluate(environment)?;
                 environment.assign(name.clone(), value.clone())?; // temp fix
                 Ok(value)
             }
-            Expression::Logical {
+            Self::Logical {
                 left,
                 operator,
                 right,
@@ -162,6 +172,14 @@ impl Expression {
                 }
 
                 right.evaluate(environment)
+            }
+            Self::Call {
+                callee,
+                paren,
+                arguments,
+            } => {
+                println!("{:?} {:?} {:?}", callee, paren, arguments);
+                todo!()
             }
         }
     }
