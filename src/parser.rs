@@ -5,11 +5,27 @@ use crate::statement::Statement;
 use crate::token::TokenType::*;
 use crate::token::{Token, TokenType};
 
+use std::fmt;
+use std::fmt::{Display, Formatter};
 use std::string::String;
 
 #[cfg(test)]
 #[path = "./tests/parser_tests.rs"]
 mod tests;
+
+enum FunctionKind {
+    Function,
+    Method,
+}
+
+impl Display for FunctionKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Function => write!(f, "Function"),
+            Self::Method => write!(f, "Method"),
+        }
+    }
+}
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -46,6 +62,16 @@ impl Parser {
     }
 
     fn declaration(&mut self) -> Result<Statement, String> {
+        if self.match_tokens(vec![Fun]) {
+            return match self.function(&FunctionKind::Function) {
+                Ok(statement) => Ok(statement),
+                Err(message) => {
+                    self.synchronize();
+                    Err(message)
+                }
+            };
+        }
+
         if self.match_tokens(vec![Var]) {
             return match self.variable_declaration() {
                 Ok(statement) => Ok(statement),
@@ -56,14 +82,10 @@ impl Parser {
             };
         }
 
-        if self.match_tokens(vec![Fun]) {
-            self.function("function")?;
-        }
-
         self.statement()
     }
 
-    fn function(&mut self, kind: &str) -> Result<Statement, String> {
+    fn function(&mut self, kind: &FunctionKind) -> Result<Statement, String> {
         let function_name = self.consume(Identifier, &format!("Expect {} name", kind))?;
 
         self.consume(LeftParen, &format!("Expect '(' after {} name", kind))?;

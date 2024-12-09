@@ -208,7 +208,7 @@ impl Expression {
                             return Err(format!("undefined function {}", name));
                         }
 
-                        Ok(fun(&parameters))
+                        fun.borrow_mut()(&parameters)
                     }
                     _ => Err(format!("Cannot use {} as callable", callable.to_type())),
                 }

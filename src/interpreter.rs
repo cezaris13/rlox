@@ -15,13 +15,13 @@ pub struct Interpreter {
     pub environment: Rc<RefCell<Environment>>,
 }
 
-fn clock_impl(_args: &Vec<LiteralValue>) -> LiteralValue {
+fn clock_impl(_args: &Vec<LiteralValue>) -> Result<LiteralValue, String> {
     let now = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("Could not get time")
         .as_secs();
 
-    LiteralValue::IntValue(now as i64)
+    Ok(LiteralValue::IntValue(now as i64))
 }
 
 impl Interpreter {
@@ -32,7 +32,7 @@ impl Interpreter {
             LiteralValue::Callable {
                 name: String::from("clock"),
                 arity: 0,
-                fun: Rc::new(clock_impl),
+                fun: Rc::new(RefCell::new(clock_impl)),
             },
         );
 
@@ -95,6 +95,43 @@ impl Interpreter {
                     parameters,
                     body,
                 } => {
+                    // let closure = |arguments: &Vec<LiteralValue>| -> Result<LiteralValue, String> {
+                    //     let mut function_environment = Environment::new();
+
+                    //     for (i, argument) in arguments.iter().enumerate() {
+                    //         function_environment.define(parameters[i].lexeme, *argument);
+                    //     }
+
+                    //     function_environment.enclosing = Some(self.environment.clone());
+
+                    //     let old_environment = self.environment.clone();
+                    //     self.environment = Rc::new(RefCell::new(function_environment));
+
+                    //     let body_of_statements =
+                    //         body.iter().map(|statement| statement.as_ref()).collect();
+
+                    //     let result = self.interpret_statements(body_of_statements);
+
+                    //     self.environment = old_environment;
+
+                    //     result?;
+
+                    //     Ok(LiteralValue::Nil)
+                    //     // result
+                    //     // println!("{:?}", name);
+                    //     // self.interpret_statements(body);
+                    //     // LiteralValue::from(name)
+                    // };
+
+                    // self.environment.borrow_mut().define(
+                    //     String::from(&name.lexeme),
+                    //     LiteralValue::Callable {
+                    //         name: String::from(&name.lexeme),
+                    //         arity: parameters.len(),
+                    //         fun: Rc::new(closure),
+                    //     },
+                    // );
+                    //
                     todo!()
                 }
             };

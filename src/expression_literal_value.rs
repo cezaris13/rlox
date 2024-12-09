@@ -1,6 +1,7 @@
 use crate::expression_literal_value::LiteralValue::*;
 use crate::token::{LiteralValue as TokenLiteralValue, Token, TokenType};
 
+use std::cell::RefCell;
 use std::fmt::{self, Display, Formatter};
 use std::ops::{Add, Div, Mul, Sub};
 use std::rc::Rc;
@@ -21,7 +22,7 @@ pub enum LiteralValue {
     Callable {
         name: String,
         arity: usize,
-        fun: Rc<dyn Fn(&Vec<LiteralValue>) -> LiteralValue>,
+        fun: Rc<RefCell<dyn FnMut(&Vec<LiteralValue>) -> Result<LiteralValue, String>>>,
     },
 }
 
