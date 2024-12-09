@@ -32,6 +32,13 @@
 
 <declaration> ::= <variableDeclaration>
                 | <statement>
+                | <functionDeclaration>
+
+<functionDeclaration> ::= "fun" <function>
+
+<function> ::= <identifier> "(" <parameters> ")" <block>
+
+<parameters> ::= <identifier> ( "," <identifier> )*
 
 <variableDeclaration> ::= "var " <identifier> ("=" <expression>) ";"
 

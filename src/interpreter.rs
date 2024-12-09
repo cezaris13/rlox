@@ -90,6 +90,13 @@ impl Interpreter {
                         self.interpret_statements(vec![*body.clone()])?; // fix here??
                     }
                 }
+                Statement::Function {
+                    name,
+                    parameters,
+                    body,
+                } => {
+                    todo!()
+                }
             };
         }
 

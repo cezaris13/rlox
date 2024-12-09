@@ -30,4 +30,10 @@ pub enum Statement {
         condition: expression::Expression,
         body: Box<Statement>,
     },
+
+    Function {
+        name: Token,
+        parameters: Vec<Token>,
+        body: Vec<Statement>,
+    },
 }

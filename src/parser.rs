@@ -56,7 +56,45 @@ impl Parser {
             };
         }
 
+        if self.match_tokens(vec![Fun]) {
+            self.function("function")?;
+        }
+
         self.statement()
+    }
+
+    fn function(&mut self, kind: &str) -> Result<Statement, String> {
+        let function_name = self.consume(Identifier, &format!("Expect {} name", kind))?;
+
+        self.consume(LeftParen, &format!("Expect '(' after {} name", kind))?;
+
+        let mut parameters = vec![];
+
+        if !self.check(RightParen) {
+            loop {
+                if parameters.len() >= 255 {
+                    return Err(String::from("Can't have more than 255 parameters."));
+                }
+
+                parameters.push(self.consume(Identifier, "Expect parameter name")?);
+
+                if !self.match_tokens(vec![Comma]) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(RightParen, "Expect ')' after parameters")?;
+
+        self.consume(LeftBrace, &format!("Expect '{{' before {} body", kind))?;
+
+        let body = self.blocks()?;
+
+        Ok(Statement::Function {
+            name: function_name,
+            parameters: parameters,
+            body: body,
+        })
     }
 
     fn variable_declaration(&mut self) -> Result<Statement, String> {
