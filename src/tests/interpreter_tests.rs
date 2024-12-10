@@ -295,4 +295,46 @@ mod tests {
             Ok(LiteralValue::IntValue(20))
         );
     }
+
+    #[test]
+    fn expression_with_function_statement__test() {
+        let source = "
+            var a=0;
+
+            fun addOne(a) {
+                a = a + 1;
+            }
+
+            var b = addOne(a);
+            var c = clock();
+          ";
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+        let statements = parser.parse().unwrap();
+
+        let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
+        let result = interpreter.interpret_statements(statements);
+
+        assert!(result.is_ok());
+
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 4
+        );
+        assert_eq!(
+            interpreter.environment.borrow().get("a"),
+            Ok(LiteralValue::IntValue(0))
+        );
+        assert_eq!(
+            interpreter.environment.borrow().get("b"),
+            Ok(LiteralValue::Nil)
+        );
+        assert_ne!(
+            interpreter.environment.borrow().get("c"),
+            Ok(LiteralValue::Nil)
+        );
+    }
 }

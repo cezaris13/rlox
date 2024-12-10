@@ -3,6 +3,8 @@ mod tests {
     use crate::expression_literal_value::LiteralValue;
     use crate::token::{Token, TokenType};
 
+    use std::rc::Rc;
+
     #[test]
     fn literal_value_to_string() {
         let literals = vec![
@@ -28,6 +30,81 @@ mod tests {
     }
 
     #[test]
+    fn test_debug_output() {
+        let test_cases = vec![
+            (LiteralValue::IntValue(42), "42"),
+            (LiteralValue::FValue(3.14), "3.14"),
+            (LiteralValue::StringValue("hello".to_string()), "\"hello\""),
+            (LiteralValue::True, "true"),
+            (LiteralValue::False, "false"),
+            (LiteralValue::Nil, "nil"),
+            (
+                LiteralValue::Callable {
+                    name: "my_func".to_string(),
+                    arity: 2,
+                    fun: Rc::new(|_, _| Ok(LiteralValue::Nil)),
+                },
+                "Callable { name: my_func, arity: 2 }",
+            ),
+        ];
+
+        for (input, expected) in test_cases {
+            assert_eq!(format!("{:?}", input), expected);
+        }
+    }
+
+    #[test]
+    fn test_partial_eq() {
+        let test_cases = vec![
+            (LiteralValue::IntValue(42), LiteralValue::IntValue(42), true),
+            (LiteralValue::FValue(3.14), LiteralValue::FValue(3.14), true),
+            (
+                LiteralValue::FValue(3.14),
+                LiteralValue::FValue(3.14159),
+                false,
+            ),
+            (
+                LiteralValue::StringValue("hello".to_string()),
+                LiteralValue::StringValue("hello".to_string()),
+                true,
+            ),
+            (LiteralValue::True, LiteralValue::True, true),
+            (LiteralValue::False, LiteralValue::False, true),
+            (LiteralValue::Nil, LiteralValue::Nil, true),
+            (
+                LiteralValue::Callable {
+                    name: "my_func".to_string(),
+                    arity: 2,
+                    fun: Rc::new(|_, _| Ok(LiteralValue::Nil)),
+                },
+                LiteralValue::Callable {
+                    name: "my_func".to_string(),
+                    arity: 2,
+                    fun: Rc::new(|_, _| Ok(LiteralValue::Nil)),
+                },
+                true,
+            ),
+            (
+                LiteralValue::Callable {
+                    name: "my_func".to_string(),
+                    arity: 2,
+                    fun: Rc::new(|_, _| Ok(LiteralValue::Nil)),
+                },
+                LiteralValue::Callable {
+                    name: "other_func".to_string(),
+                    arity: 2,
+                    fun: Rc::new(|_, _| Ok(LiteralValue::Nil)),
+                },
+                false,
+            ),
+        ];
+
+        for (a, b, expected) in test_cases {
+            assert_eq!(a == b, expected);
+        }
+    }
+
+    #[test]
     fn literal_value_to_type() {
         let literals = vec![
             LiteralValue::Nil,
@@ -36,9 +113,14 @@ mod tests {
             LiteralValue::IntValue(12),
             LiteralValue::StringValue(String::from("Hello")),
             LiteralValue::FValue(1.1),
+            LiteralValue::Callable {
+                name: "other_func".to_string(),
+                arity: 2,
+                fun: Rc::new(|_, _| Ok(LiteralValue::Nil)),
+            },
         ];
 
-        let responses = vec!["Nil", "Bool", "Bool", "Int", "String", "Float"];
+        let responses = vec!["Nil", "Bool", "Bool", "Int", "String", "Float", "Callable"];
 
         let result = literals
             .iter()
