@@ -16,7 +16,7 @@ mod tests {
             Token::new(Semicolon, ";".to_string(), None, 0),
         ];
 
-        let mut parser = Parser::new(tokens);
+        let mut parser = Parser::new(&tokens);
 
         let parsed_expression = parser.expression();
 

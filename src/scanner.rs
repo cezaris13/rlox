@@ -49,7 +49,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub fn scan_tokens(&mut self) -> Result<Vec<Token>, String> {
+    pub fn scan_tokens(&mut self) -> Result<&Vec<Token>, String> {
         let mut errors = vec![];
 
         while !self.is_at_end() {
@@ -67,7 +67,7 @@ impl<'a> Scanner<'a> {
             return Err(joined);
         }
 
-        Ok(self.tokens.clone()) // temp fix
+        Ok(&self.tokens)
     }
 
     fn scan_token(&mut self) -> Result<(), String> {

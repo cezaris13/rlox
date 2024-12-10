@@ -27,15 +27,15 @@ impl Display for FunctionKind {
     }
 }
 
-pub struct Parser {
-    tokens: Vec<Token>,
+pub struct Parser<'a> {
+    tokens: &'a Vec<Token>,
     current: usize,
 }
 
-impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Self {
+impl<'a> Parser<'a> {
+    pub fn new(tokens: &'a Vec<Token>) -> Self {
         Self {
-            tokens: tokens,
+            tokens,
             current: 0,
         }
     }

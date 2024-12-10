@@ -49,6 +49,12 @@ impl From<Token> for LiteralValue {
     }
 }
 
+impl From<&Token> for LiteralValue {
+    fn from(token: &Token) -> Self {
+        Self::from(token.clone())
+    }
+}
+
 impl From<bool> for LiteralValue {
     fn from(boolean: bool) -> Self {
         if boolean {

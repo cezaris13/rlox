@@ -83,14 +83,15 @@ impl Display for Expression {
                 format!("({} {})", operator.lexeme, right.to_string())
             }
             Self::Variable { token } => {
-                if let Some(_) = &token.literal {
+                let lexeme = &token.lexeme;
+                if let Some(_) = token.literal {
                     format!(
                         "(defvar {} {})",
-                        token.lexeme,
-                        LiteralValue::from(token.clone())
+                        lexeme,
+                        LiteralValue::from(token)
                     )
                 } else {
-                    format!("(defvar {})", token.lexeme)
+                    format!("(defvar {})", lexeme)
                 }
             }
             Self::Assign { name, value } => format!("(= {} {})", name, value.to_string()),
