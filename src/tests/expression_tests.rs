@@ -99,6 +99,18 @@ mod tests {
     }
 
     #[test]
+    fn pretty_print_call() {
+        let source = "call(1,2,3)";
+        let mut scanner: Scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+        let mut parser = Parser::new(tokens);
+        let expression = parser.expression().unwrap();
+
+        let result = expression.to_string();
+        assert_eq!(result, "((defvar call) [1,2,3])");
+    }
+
+    #[test]
     fn test_bang_operator() {
         let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
             ("!0", Ok(LiteralValue::True)),
@@ -392,15 +404,67 @@ mod tests {
         assert_eq!(results, expected_results);
     }
 
+    #[test]
+    fn test_call_operator() {
+        let test_cases: Vec<(&str, Result<LiteralValue, String>)> = vec![
+            ("clock()", Ok(LiteralValue::IntValue(2))),
+            (
+                "clock(1)",
+                Err(String::from("Expected 0 arguments but got 1.")),
+            ),
+            ("test(2+2,5+5)", Ok(LiteralValue::IntValue(2))),
+            (
+                "testVariable(2+2,5+5)",
+                Err(String::from("Cannot use Bool as callable")),
+            ),
+            (
+                "nonExistingFunction(2+2,5+5)",
+                Err(String::from("Undefined variable nonExistingFunction")),
+            ),
+        ];
+
+        let inputs = get_inputs(&test_cases);
+        let expected_results = get_expected_results(&test_cases);
+
+        let results = evaluate_list_of_sources(&inputs);
+
+        assert_eq!(results, expected_results);
+    }
+
     fn evaluate_list_of_sources(sources: &Vec<&str>) -> Vec<Result<LiteralValue, String>> {
         sources
             .iter()
             .map(|source| {
+                let closure = move |parent_environment: Rc<RefCell<Environment>>,
+                                    arguments: &Vec<LiteralValue>|
+                      -> Result<LiteralValue, String> {
+                    Ok(LiteralValue::IntValue(2))
+                };
+                let environment = Rc::new(RefCell::new(Environment::new()));
+                environment.borrow_mut().define(
+                    String::from("clock"),
+                    LiteralValue::Callable {
+                        name: String::from("clock"),
+                        arity: 0,
+                        fun: Rc::new(closure),
+                    },
+                );
+                environment.borrow_mut().define(
+                    String::from("test"),
+                    LiteralValue::Callable {
+                        name: String::from("test"),
+                        arity: 2,
+                        fun: Rc::new(closure),
+                    },
+                );
+
+                environment
+                    .borrow_mut()
+                    .define(String::from("testVariable"), LiteralValue::False);
                 let mut scanner: Scanner = Scanner::new(source);
                 let tokens = scanner.scan_tokens().unwrap();
                 let mut parser = Parser::new(tokens);
                 let expression = parser.expression().unwrap();
-                let environment = Rc::new(RefCell::new(Environment::new()));
                 expression.evaluate(environment)
             })
             .collect::<Vec<Result<LiteralValue, String>>>()

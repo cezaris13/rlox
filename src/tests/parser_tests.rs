@@ -2,10 +2,13 @@
 mod tests {
     use crate::expression::Expression::*;
     use crate::expression_literal_value::LiteralValue as ExpressionLiteralValue;
-    use crate::statement::Statement::{Block, Expression, Print, Variable};
+    use crate::statement::Statement::{Block, Expression, Print, Return, Variable};
+    use crate::token::TokenType::Return as TokenReturn;
     use crate::token::{LiteralValue, Token, TokenType::*};
     use crate::Parser;
     use crate::Scanner;
+
+    use std::string::String;
 
     #[test]
     fn test_addition() {
@@ -145,6 +148,35 @@ mod tests {
             expression: Literal {
                 value: ExpressionLiteralValue::StringValue(std::string::String::from("hello")),
             },
+        };
+
+        assert!(expression.is_ok());
+
+        let string_expression = expression.unwrap();
+        assert_eq!(string_expression.len(), 1);
+        assert_eq!(string_expression[0], response);
+    }
+
+    #[test]
+    fn test_return_operator() {
+        let source = "return 12;";
+        let mut scanner: Scanner = Scanner::new(source);
+
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+
+        let expression = parser.parse();
+        let response = Return {
+            keyword: Token {
+                token_type: TokenReturn,
+                lexeme: String::from("return"),
+                literal: None,
+                line: 1,
+            },
+            value: Some(Literal {
+                value: ExpressionLiteralValue::IntValue(12),
+            }),
         };
 
         assert!(expression.is_ok());
