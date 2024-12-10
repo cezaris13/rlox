@@ -66,6 +66,26 @@ mod tests {
         assert_eq!(lines[20], "6765");
     }
 
+    #[test]
+    fn recursive_function_test() {
+        let lines = test_file("./src/tests/cases/fundef.lox");
+
+        assert_eq!(lines.len(), 3);
+
+        assert_eq!(lines[0], "1");
+        assert_eq!(lines[1], "2");
+        assert_eq!(lines[2], "3");
+    }
+
+    #[test]
+    fn function_modifies_env_val_test() {
+        let lines = test_file("./src/tests/cases/fun_mods_local_env.lox");
+
+        assert_eq!(lines.len(), 1);
+
+        assert_eq!(lines[0], "3");
+    }
+
     fn test_file(file_path: &str) -> Vec<String> {
         let output = Command::new("cargo")
             .args(["run", file_path])
