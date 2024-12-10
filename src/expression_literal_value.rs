@@ -1,3 +1,4 @@
+use crate::environment::Environment;
 use crate::expression_literal_value::LiteralValue::*;
 use crate::token::{LiteralValue as TokenLiteralValue, Token, TokenType};
 
@@ -22,7 +23,9 @@ pub enum LiteralValue {
     Callable {
         name: String,
         arity: usize,
-        fun: Rc<RefCell<dyn FnMut(&Vec<LiteralValue>) -> Result<LiteralValue, String>>>,
+        fun: Rc<
+            dyn Fn(Rc<RefCell<Environment>>, &Vec<LiteralValue>) -> Result<LiteralValue, String>,
+        >,
     },
 }
 

@@ -7,6 +7,8 @@ mod tests {
     use crate::Parser;
     use crate::Scanner;
 
+    use std::cell::RefCell;
+    use std::rc::Rc;
     use std::string::String;
 
     #[test]
@@ -136,21 +138,21 @@ mod tests {
     fn evaluate_group() {
         let source = "( 1 + 2 )";
 
-        let mut environment = Environment::new();
+        let environment = Rc::new(RefCell::new(Environment::new()));
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
         let mut parser = Parser::new(tokens);
         let expression = parser.expression();
 
         assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
+        let evaluation = expression.unwrap().evaluate(environment);
 
         assert_eq!(evaluation.unwrap(), IntValue(3));
     }
 
     #[test]
     fn evaluate_complex_int_float_returns_result() {
-        let mut environment = Environment::new();
+        let environment = Rc::new(RefCell::new(Environment::new()));
         let source = "2 * 2.5 + 5 / 2";
         let mut scanner: Scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens().unwrap();
@@ -158,7 +160,7 @@ mod tests {
         let expression = parser.expression();
 
         assert!(expression.is_ok());
-        let evaluation = expression.unwrap().evaluate(&mut environment);
+        let evaluation = expression.unwrap().evaluate(environment);
 
         assert_eq!(evaluation.unwrap(), FValue(7.0));
     }
@@ -398,8 +400,8 @@ mod tests {
                 let tokens = scanner.scan_tokens().unwrap();
                 let mut parser = Parser::new(tokens);
                 let expression = parser.expression().unwrap();
-                let mut environment = Environment::new();
-                expression.evaluate(&mut environment)
+                let environment = Rc::new(RefCell::new(Environment::new()));
+                expression.evaluate(environment)
             })
             .collect::<Vec<Result<LiteralValue, String>>>()
     }

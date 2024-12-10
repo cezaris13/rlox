@@ -3,7 +3,9 @@ use crate::environment::Environment;
 use crate::expression_literal_value::LiteralValue::{self, *};
 use crate::token::{Token, TokenType::*};
 
+use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 use std::string::String;
 
 #[cfg(test)]
@@ -111,7 +113,7 @@ impl Display for Expression {
 }
 
 impl Expression {
-    pub fn evaluate(&self, environment: &mut Environment) -> Result<LiteralValue, String> {
+    pub fn evaluate(&self, environment: Rc<RefCell<Environment>>) -> Result<LiteralValue, String> {
         match self {
             Self::Literal { value } => Ok(value.clone()),
             Self::Grouping { group } => group.evaluate(environment),
@@ -135,7 +137,7 @@ impl Expression {
                 operator,
                 right,
             } => {
-                let left = (*left).evaluate(environment)?;
+                let left = (*left).evaluate(environment.clone())?;
                 let right = (*right).evaluate(environment)?;
 
                 match &operator.token_type {
@@ -156,10 +158,12 @@ impl Expression {
                     ),
                 }
             }
-            Self::Variable { token } => environment.get(&token.lexeme),
+            Self::Variable { token } => environment.borrow_mut().get(&token.lexeme),
             Self::Assign { name, value } => {
-                let value = value.evaluate(environment)?;
-                environment.assign(name.clone(), value.clone())?; // temp fix
+                let value = value.evaluate(environment.clone())?;
+                environment
+                    .borrow_mut()
+                    .assign(name.clone(), value.clone())?; // temp fix
                 Ok(value)
             }
             Self::Logical {
@@ -167,7 +171,7 @@ impl Expression {
                 operator,
                 right,
             } => {
-                let left_value = left.evaluate(environment)?;
+                let left_value = left.evaluate(environment.clone())?;
 
                 if operator.token_type == Or {
                     if bool::from(&left_value) {
@@ -186,7 +190,7 @@ impl Expression {
                 paren: _,
                 arguments,
             } => {
-                let callable = (*callee).evaluate(environment)?;
+                let callable = (*callee).evaluate(environment.clone())?;
                 match callable {
                     Callable { name, arity, fun } => {
                         if arity != arguments.len() {
@@ -199,16 +203,16 @@ impl Expression {
 
                         let mut parameters = vec![];
                         for argument in arguments {
-                            let literal = argument.evaluate(environment)?;
+                            let literal = argument.evaluate(environment.clone())?;
                             parameters.push(literal);
                         }
 
                         // figure out if the variable can be the same name as the function??
-                        if let Err(_) = environment.get(&name) {
+                        if let Err(_) = environment.borrow_mut().get(&name) {
                             return Err(format!("undefined function {}", name));
                         }
 
-                        fun.borrow_mut()(&parameters)
+                        fun(environment, &parameters)
                     }
                     _ => Err(format!("Cannot use {} as callable", callable.to_type())),
                 }

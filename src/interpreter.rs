@@ -15,7 +15,10 @@ pub struct Interpreter {
     pub environment: Rc<RefCell<Environment>>,
 }
 
-fn clock_impl(_args: &Vec<LiteralValue>) -> Result<LiteralValue, String> {
+fn clock_impl(
+    _env: Rc<RefCell<Environment>>,
+    _args: &Vec<LiteralValue>,
+) -> Result<LiteralValue, String> {
     let now = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("Could not get time")
@@ -32,7 +35,7 @@ impl Interpreter {
             LiteralValue::Callable {
                 name: String::from("clock"),
                 arity: 0,
-                fun: Rc::new(RefCell::new(clock_impl)),
+                fun: Rc::new(clock_impl),
             },
         );
 
@@ -41,14 +44,21 @@ impl Interpreter {
         }
     }
 
+    fn for_closure(parent: Rc<RefCell<Environment>>) -> Self {
+        let environment = Rc::new(RefCell::new(Environment::new()));
+        environment.borrow_mut().enclosing = Some(parent.clone());
+
+        Self { environment }
+    }
+
     pub fn interpret_statements(&mut self, statements: Vec<Statement>) -> Result<(), String> {
         for statement in statements {
             match statement {
                 Statement::Expression { expression } => {
-                    expression.evaluate(&mut self.environment.borrow_mut())?;
+                    expression.evaluate(self.environment.clone())?;
                 }
                 Statement::Print { expression } => {
-                    let result = expression.evaluate(&mut self.environment.borrow_mut())?;
+                    let result = expression.evaluate(self.environment.clone())?;
                     println!("{}", result);
                 }
                 Statement::Variable { token, initializer } => {
@@ -56,7 +66,7 @@ impl Interpreter {
                         Expression::Literal {
                             value: LiteralValue::Nil,
                         } => LiteralValue::Nil,
-                        _ => initializer.evaluate(&mut self.environment.borrow_mut())?,
+                        _ => initializer.evaluate(self.environment.clone())?,
                     };
 
                     self.environment.borrow_mut().define(token.lexeme, value);
@@ -77,7 +87,7 @@ impl Interpreter {
                     then_branch,
                     else_branch,
                 } => {
-                    let condition_value = condition.evaluate(&mut self.environment.borrow_mut())?;
+                    let condition_value = condition.evaluate(self.environment.clone())?;
 
                     if bool::from(condition_value) {
                         self.interpret_statements(vec![*then_branch])?;
@@ -86,7 +96,7 @@ impl Interpreter {
                     }
                 }
                 Statement::While { condition, body } => {
-                    while bool::from(condition.evaluate(&mut self.environment.borrow_mut())?) {
+                    while bool::from(condition.evaluate(self.environment.clone())?) {
                         self.interpret_statements(vec![*body.clone()])?; // fix here??
                     }
                 }
@@ -95,44 +105,33 @@ impl Interpreter {
                     parameters,
                     body,
                 } => {
-                    // let closure = |arguments: &Vec<LiteralValue>| -> Result<LiteralValue, String> {
-                    //     let mut function_environment = Environment::new();
+                    let arity = parameters.len();
 
-                    //     for (i, argument) in arguments.iter().enumerate() {
-                    //         function_environment.define(parameters[i].lexeme, *argument);
-                    //     }
+                    let closure = move |parent_environment: Rc<RefCell<Environment>>,
+                                        arguments: &Vec<LiteralValue>|
+                          -> Result<LiteralValue, String> {
+                        let mut closure_interpreter = Interpreter::for_closure(parent_environment);
 
-                    //     function_environment.enclosing = Some(self.environment.clone());
+                        for (i, argument) in arguments.iter().enumerate() {
+                            closure_interpreter
+                                .environment
+                                .borrow_mut()
+                                .define(String::from(&parameters[i].lexeme), argument.clone());
+                        }
 
-                    //     let old_environment = self.environment.clone();
-                    //     self.environment = Rc::new(RefCell::new(function_environment));
+                        closure_interpreter.interpret_statements(body.clone())?;
 
-                    //     let body_of_statements =
-                    //         body.iter().map(|statement| statement.as_ref()).collect();
+                        Ok(LiteralValue::Nil)
+                    };
 
-                    //     let result = self.interpret_statements(body_of_statements);
-
-                    //     self.environment = old_environment;
-
-                    //     result?;
-
-                    //     Ok(LiteralValue::Nil)
-                    //     // result
-                    //     // println!("{:?}", name);
-                    //     // self.interpret_statements(body);
-                    //     // LiteralValue::from(name)
-                    // };
-
-                    // self.environment.borrow_mut().define(
-                    //     String::from(&name.lexeme),
-                    //     LiteralValue::Callable {
-                    //         name: String::from(&name.lexeme),
-                    //         arity: parameters.len(),
-                    //         fun: Rc::new(closure),
-                    //     },
-                    // );
-                    //
-                    todo!()
+                    self.environment.borrow_mut().define(
+                        String::from(&name.lexeme),
+                        LiteralValue::Callable {
+                            name: String::from(&name.lexeme),
+                            arity,
+                            fun: Rc::new(closure),
+                        },
+                    );
                 }
             };
         }
