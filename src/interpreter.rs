@@ -133,6 +133,9 @@ impl Interpreter {
                         },
                     );
                 }
+                Statement::Return { keyword, value } => {
+                    todo!()
+                }
             };
         }
 

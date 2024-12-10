@@ -34,10 +34,7 @@ pub struct Parser<'a> {
 
 impl<'a> Parser<'a> {
     pub fn new(tokens: &'a Vec<Token>) -> Self {
-        Self {
-            tokens,
-            current: 0,
-        }
+        Self { tokens, current: 0 }
     }
 
     // region grammar components
@@ -160,6 +157,10 @@ impl<'a> Parser<'a> {
             return self.print_statement();
         }
 
+        if self.match_tokens(vec![Return]) {
+            return self.return_statement();
+        }
+
         self.expression_statement()
     }
 
@@ -248,20 +249,6 @@ impl<'a> Parser<'a> {
         Ok(body)
     }
 
-    fn print_statement(&mut self) -> Result<Statement, String> {
-        let expression = self.expression()?;
-        self.consume(Semicolon, "Expected ';' after the value.")?;
-
-        Ok(Statement::Print { expression })
-    }
-
-    fn expression_statement(&mut self) -> Result<Statement, String> {
-        let expression = self.expression()?;
-        self.consume(Semicolon, "Expected ';' after the value.")?;
-
-        Ok(Statement::Expression { expression })
-    }
-
     fn if_statement(&mut self) -> Result<Statement, String> {
         self.consume(LeftParen, "Expected '(' after 'if'")?;
         let condition = self.expression()?;
@@ -282,6 +269,34 @@ impl<'a> Parser<'a> {
             then_branch,
             else_branch,
         })
+    }
+
+    fn print_statement(&mut self) -> Result<Statement, String> {
+        let expression = self.expression()?;
+        self.consume(Semicolon, "Expected ';' after the value.")?;
+
+        Ok(Statement::Print { expression })
+    }
+
+    fn return_statement(&mut self) -> Result<Statement, String> {
+        let keyword = self.previous();
+
+        let mut value = None;
+
+        if !self.check(Semicolon) {
+            value = Some(self.expression()?);
+        }
+
+        self.consume(Semicolon, "Expected ';' after return value")?;
+
+        Ok(Statement::Return { keyword, value })
+    }
+
+    fn expression_statement(&mut self) -> Result<Statement, String> {
+        let expression = self.expression()?;
+        self.consume(Semicolon, "Expected ';' after the value.")?;
+
+        Ok(Statement::Expression { expression })
     }
 
     pub fn expression(&mut self) -> Result<Expression, String> {

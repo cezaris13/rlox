@@ -36,4 +36,9 @@ pub enum Statement {
         parameters: Vec<Token>,
         body: Vec<Statement>,
     },
+
+    Return {
+        keyword: Token,
+        value: Option<expression::Expression>,
+    },
 }

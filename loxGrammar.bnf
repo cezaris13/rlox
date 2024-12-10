@@ -48,6 +48,7 @@
               | <ifStatement>
               | <whileStatement>
               | <forStatement>
+              | <returnStatement>
 
 <printStatement> ::= "print " <expression> ";"
 
@@ -63,6 +64,8 @@
 <forStatement> ::= "for" "(" (<variableDeclaration> | <expressionStatement> | ";")
                          <expression>? ";"
                          <expression>? ")" <statement>
+
+<returnStatement> ::= "return" <expression>? ";"
 
 <expression> ::= <assignment>
 
