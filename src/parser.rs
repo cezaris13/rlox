@@ -353,6 +353,7 @@ impl<'a> Parser<'a> {
                 right: Box::new(right),
             };
         }
+
         Ok(expression)
     }
 

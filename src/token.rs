@@ -1,5 +1,5 @@
-use std::str::FromStr;
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum TokenType {
@@ -56,57 +56,59 @@ impl FromStr for TokenType {
     type Err = String;
 
     fn from_str(input: &str) -> Result<TokenType, Self::Err> {
-        match input {
-            "LeftParen" => Ok(TokenType::LeftParen),
-            "RightParen" => Ok(TokenType::RightParen),
-            "LeftBrace" => Ok(TokenType::LeftBrace),
-            "RightBrace" => Ok(TokenType::RightBrace),
-            "Comma" => Ok(TokenType::Comma),
-            "Dot" => Ok(TokenType::Dot),
-            "-" | "Minus" => Ok(TokenType::Minus),
-            "+" | "Plus" => Ok(TokenType::Plus),
-            ";" => Ok(TokenType::Semicolon),
-            "/" | "Slash" => Ok(TokenType::Slash),
-            "*" | "Star" => Ok(TokenType::Star),
+        let token_type = match input {
+            "LeftParen" => TokenType::LeftParen,
+            "RightParen" => TokenType::RightParen,
+            "LeftBrace" => TokenType::LeftBrace,
+            "RightBrace" => TokenType::RightBrace,
+            "Comma" => TokenType::Comma,
+            "Dot" => TokenType::Dot,
+            "-" | "Minus" => TokenType::Minus,
+            "+" | "Plus" => TokenType::Plus,
+            ";" => TokenType::Semicolon,
+            "/" | "Slash" => TokenType::Slash,
+            "*" | "Star" => TokenType::Star,
 
             // One or two character tokens
-            "!" => Ok(TokenType::Bang),
-            "BangEqual" => Ok(TokenType::BangEqual),
-            "=" => Ok(TokenType::Equal),
-            "EqualEqual" => Ok(TokenType::EqualEqual),
-            ">" | "Greater" => Ok(TokenType::Greater),
-            ">=" | "GreaterEqual" => Ok(TokenType::GreaterEqual),
-            "<" | "Less" => Ok(TokenType::Less),
-            "<=" | "LessEqual" => Ok(TokenType::LessEqual),
+            "!" => TokenType::Bang,
+            "BangEqual" => TokenType::BangEqual,
+            "=" => TokenType::Equal,
+            "EqualEqual" => TokenType::EqualEqual,
+            ">" | "Greater" => TokenType::Greater,
+            ">=" | "GreaterEqual" => TokenType::GreaterEqual,
+            "<" | "Less" => TokenType::Less,
+            "<=" | "LessEqual" => TokenType::LessEqual,
 
             // Keywords
-            "And" => Ok(TokenType::And),
-            "Class" => Ok(TokenType::Class),
-            "Else" => Ok(TokenType::Else),
-            "False" => Ok(TokenType::False),
-            "Fun" => Ok(TokenType::Fun),
-            "For" => Ok(TokenType::For),
-            "If" => Ok(TokenType::If),
-            "Nil" => Ok(TokenType::Nil),
-            "Or" => Ok(TokenType::Or),
-            "Print" => Ok(TokenType::Print),
-            "Return" => Ok(TokenType::Return),
-            "Super" => Ok(TokenType::Super),
-            "This" => Ok(TokenType::This),
-            "True" => Ok(TokenType::True),
-            "Var" => Ok(TokenType::Var),
-            "While" => Ok(TokenType::While),
+            "And" => TokenType::And,
+            "Class" => TokenType::Class,
+            "Else" => TokenType::Else,
+            "False" => TokenType::False,
+            "Fun" => TokenType::Fun,
+            "For" => TokenType::For,
+            "If" => TokenType::If,
+            "Nil" => TokenType::Nil,
+            "Or" => TokenType::Or,
+            "Print" => TokenType::Print,
+            "Return" => TokenType::Return,
+            "Super" => TokenType::Super,
+            "This" => TokenType::This,
+            "True" => TokenType::True,
+            "Var" => TokenType::Var,
+            "While" => TokenType::While,
 
             // Literals
-            "Identifier" => Ok(TokenType::Identifier),
-            "String" => Ok(TokenType::String),
-            "Number" => Ok(TokenType::Number),
+            "Identifier" => TokenType::Identifier,
+            "String" => TokenType::String,
+            "Number" => TokenType::Number,
 
             // End of file
-            "Eof" => Ok(TokenType::Eof),
+            "Eof" => TokenType::Eof,
 
-            _ => Err(format!("Could not convert '{}' to TokenType", input)),
-        }
+            _ => return Err(format!("Could not convert '{}' to TokenType", input)),
+        };
+
+        Ok(token_type)
     }
 }
 

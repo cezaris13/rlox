@@ -85,11 +85,7 @@ impl Display for Expression {
             Self::Variable { token } => {
                 let lexeme = &token.lexeme;
                 if let Some(_) = token.literal {
-                    format!(
-                        "(defvar {} {})",
-                        lexeme,
-                        LiteralValue::from(token)
-                    )
+                    format!("(defvar {} {})", lexeme, LiteralValue::from(token))
                 } else {
                     format!("(defvar {})", lexeme)
                 }
