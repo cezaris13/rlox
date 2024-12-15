@@ -435,8 +435,8 @@ mod tests {
         sources
             .iter()
             .map(|source| {
-                let closure = move |parent_environment: Rc<RefCell<Environment>>,
-                                    arguments: &Vec<LiteralValue>|
+                let closure = move |_parent_environment: Rc<RefCell<Environment>>,
+                                    _arguments: &Vec<LiteralValue>|
                       -> Result<LiteralValue, String> {
                     Ok(LiteralValue::IntValue(2))
                 };

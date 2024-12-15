@@ -86,6 +86,25 @@ mod tests {
         assert_eq!(lines[0], "3");
     }
 
+    #[test]
+    fn function_with_return() {
+        let lines = test_file("./src/tests/cases/funreturn.lox");
+
+        assert_eq!(lines.len(), 1);
+
+        assert_eq!(lines[0], "5");
+    }
+
+    #[test]
+    fn function_with_empty_return() {
+        let lines = test_file("./src/tests/cases/fun_empty_return.lox");
+
+        assert_eq!(lines.len(), 2);
+
+        assert_eq!(lines[0], "0");
+        assert_eq!(lines[1], "nil");
+    }
+
     fn test_file(file_path: &str) -> Vec<String> {
         let output = Command::new("cargo")
             .args(["run", file_path])

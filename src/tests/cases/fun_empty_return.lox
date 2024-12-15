@@ -1,0 +1,10 @@
+ var a=0;
+
+fun printA(a) {
+    print a;
+    return;
+}
+
+var b = printA(a);
+
+print b;

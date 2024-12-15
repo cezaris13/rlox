@@ -106,6 +106,7 @@ impl Interpreter {
                     body,
                 } => {
                     let arity = parameters.len();
+                    let body = body.clone();
 
                     let closure = move |parent_environment: Rc<RefCell<Environment>>,
                                         arguments: &Vec<LiteralValue>|
@@ -119,7 +120,17 @@ impl Interpreter {
                                 .define(String::from(&parameters[i].lexeme), argument.clone());
                         }
 
-                        closure_interpreter.interpret_statements(body.clone())?;
+                        for i in 0..(body.len()) {
+                            closure_interpreter.interpret_statements(vec![body[i].clone()])?;
+
+                            if let Statement::Return {
+                                keyword: _,
+                                value: _,
+                            } = &body[i]
+                            {
+                                return closure_interpreter.environment.borrow_mut().get("return");
+                            }
+                        }
 
                         Ok(LiteralValue::Nil)
                     };
@@ -133,8 +144,15 @@ impl Interpreter {
                         },
                     );
                 }
-                Statement::Return { keyword, value } => {
-                    todo!()
+                Statement::Return { keyword: _, value } => {
+                    let response = match value {
+                        Some(val) => val.evaluate(self.environment.clone())?,
+                        _ => LiteralValue::Nil,
+                    };
+
+                    self.environment
+                        .borrow_mut()
+                        .define(String::from("return"), response);
                 }
             };
         }
