@@ -105,6 +105,28 @@ mod tests {
         assert_eq!(lines[1], "nil");
     }
 
+    #[test]
+    fn function_conditional_return() {
+        let lines = test_file("./src/tests/cases/fun_conditional_return.lox");
+
+        assert_eq!(lines.len(), 4);
+
+        assert_eq!(lines[0], "3");
+        assert_eq!(lines[1], "2");
+        assert_eq!(lines[2], "1");
+        assert_eq!(lines[3], "0");
+    }
+
+    #[test]
+    fn function_nested() {
+        let lines = test_file("./src/tests/cases/fun_very_nested.lox");
+
+        assert_eq!(lines.len(), 2);
+
+        assert_eq!(lines[0], "2");
+        assert_eq!(lines[1], "3");
+    }
+
     fn test_file(file_path: &str) -> Vec<String> {
         let output = Command::new("cargo")
             .args(["run", file_path])

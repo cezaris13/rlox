@@ -13,6 +13,7 @@ mod tests;
 
 pub struct Interpreter {
     pub environment: Rc<RefCell<Environment>>,
+    globals: Rc<RefCell<Environment>>,
 }
 
 fn clock_impl(
@@ -40,6 +41,7 @@ impl Interpreter {
         );
 
         Self {
+            globals: Rc::new(RefCell::new(Environment::new())),
             environment: Rc::new(RefCell::new(environment)),
         }
     }
@@ -48,7 +50,10 @@ impl Interpreter {
         let environment = Rc::new(RefCell::new(Environment::new()));
         environment.borrow_mut().enclosing = Some(parent.clone());
 
-        Self { environment }
+        Self {
+            globals: Rc::new(RefCell::new(Environment::new())),
+            environment,
+        }
     }
 
     pub fn interpret_statements(&mut self, statements: Vec<Statement>) -> Result<(), String> {
@@ -123,12 +128,8 @@ impl Interpreter {
                         for i in 0..(body.len()) {
                             closure_interpreter.interpret_statements(vec![body[i].clone()])?;
 
-                            if let Statement::Return {
-                                keyword: _,
-                                value: _,
-                            } = &body[i]
-                            {
-                                return closure_interpreter.environment.borrow_mut().get("return");
+                            if let Ok(value) = closure_interpreter.globals.borrow().get("return") {
+                                return Ok(value);
                             }
                         }
 
@@ -150,7 +151,7 @@ impl Interpreter {
                         _ => LiteralValue::Nil,
                     };
 
-                    self.environment
+                    self.globals
                         .borrow_mut()
                         .define(String::from("return"), response);
                 }

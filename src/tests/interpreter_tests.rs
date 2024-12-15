@@ -412,4 +412,90 @@ mod tests {
             Ok(LiteralValue::Nil)
         );
     }
+
+    #[test]
+    fn test_function_with_conditional_return() {
+        let source = "
+            fun condreturn(a) {
+                if (a <= 0)
+                {
+                    return 0;
+                }
+
+                return a - 1;
+            }
+
+            var a = condreturn(4);
+            var b = condreturn(-1);
+          ";
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+        let statements = parser.parse().unwrap();
+
+        let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
+        let result = interpreter.interpret_statements(statements);
+
+        assert!(result.is_ok());
+
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 3
+        );
+        assert_eq!(
+            interpreter.environment.borrow().get("a"),
+            Ok(LiteralValue::IntValue(3))
+        );
+        assert_eq!(
+            interpreter.environment.borrow().get("b"),
+            Ok(LiteralValue::IntValue(0))
+        );
+    }
+
+    #[test]
+    fn test_function_with_nested_blocks() {
+        let source = "
+            fun nested(a) {
+                if (a < 3) {
+                    if (a > 1) {
+                        return a;
+                    }
+                }
+                {
+                    a = a + 2;
+                    return a;
+                }
+                return -1;
+            }
+
+            var a = nested(2);
+            var b = nested(1);
+          ";
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens().unwrap();
+
+        let mut parser = Parser::new(tokens);
+        let statements = parser.parse().unwrap();
+
+        let mut interpreter: Interpreter = Interpreter::new();
+        let variable_count = interpreter.environment.borrow().values.len();
+        let result = interpreter.interpret_statements(statements);
+
+        assert!(result.is_ok());
+
+        assert_eq!(
+            interpreter.environment.borrow().values.len(),
+            variable_count + 3
+        );
+        assert_eq!(
+            interpreter.environment.borrow().get("a"),
+            Ok(LiteralValue::IntValue(2))
+        );
+        assert_eq!(
+            interpreter.environment.borrow().get("b"),
+            Ok(LiteralValue::IntValue(3))
+        );
+    }
 }
